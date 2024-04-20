@@ -1,0 +1,438 @@
+<!doctype html><html lang=zh><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>使用 Hardhat 入门以太坊智能合约 - ZA TAN</title><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui"><meta name=renderer content="webkit"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="black"><meta name=format-detection content="telephone=no,email=no,adress=no"><meta name=theme-color content="#000000"><meta http-equiv=window-target content="_top"><meta name=description content="0x1 概述 我在入门以太坊智能合约开发时，首先我就面临了一个选择，Hardhat Vs Truffle Vs Remix，我应该选择哪个开发工具。我就在谷歌上搜索很多对比"><meta name=generator content="Hugo 0.110.0 with theme pure"><title>使用 Hardhat 入门以太坊智能合约 - ZA TAN</title><link rel=icon href=/favicon.png type=image/x-icon><link rel=stylesheet href=/css/style.min.c58e22f1aa6179cd5cb60b9e08421a2b9a9c9fe9352d095e051b51aae209e5c0.css><link rel=stylesheet href=https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css async><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css async><meta property="og:title" content="使用 Hardhat 入门以太坊智能合约"><meta property="og:description" content="0x1 概述 我在入门以太坊智能合约开发时，首先我就面临了一个选择，Hardhat Vs Truffle Vs Remix，我应该选择哪个开发工具。我就在谷歌上搜索很多对比"><meta property="og:type" content="article"><meta property="og:url" content="https://www.ganymedenil.com/2022/03/03/getting-started-with-ethereum-smart-contracts-with-hardhat.html"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-03-03T00:53:25+00:00"><meta property="article:modified_time" content="2022-03-03T00:53:25+00:00"><meta itemprop=name content="使用 Hardhat 入门以太坊智能合约"><meta itemprop=description content="0x1 概述 我在入门以太坊智能合约开发时，首先我就面临了一个选择，Hardhat Vs Truffle Vs Remix，我应该选择哪个开发工具。我就在谷歌上搜索很多对比"><meta itemprop=datePublished content="2022-03-03T00:53:25+00:00"><meta itemprop=dateModified content="2022-03-03T00:53:25+00:00"><meta itemprop=wordCount content="7064"><meta itemprop=keywords content="Hardhat,智能合约,以太坊,Solidity,"><meta name=twitter:card content="summary"><meta name=twitter:title content="使用 Hardhat 入门以太坊智能合约"><meta name=twitter:description content="0x1 概述 我在入门以太坊智能合约开发时，首先我就面临了一个选择，Hardhat Vs Truffle Vs Remix，我应该选择哪个开发工具。我就在谷歌上搜索很多对比"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head></head><body class="main-center theme-white" itemscope itemtype=http://schema.org/WebPage><header class=header itemscope itemtype=http://schema.org/WPHeader><div class=slimContent><div class=navbar-header><div class="profile-block text-center"><a id=avatar href=https://github.com/GanymedeNil target=_blank><img class="img-circle img-rotate" src=/avatar.png width=200 height=200></a><h2 id=name class="hidden-xs hidden-sm">Ganymede Nil</h2><h3 id=title class="hidden-xs hidden-sm hidden-md">Developer</h3><small id=location class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>BeiJing, China</small></div><div class=search id=search-form-wrap><form class="search-form sidebar-form"><div class=input-group><input type=text class="search-form-input form-control" placeholder=搜索>
+<span class=input-group-btn><button type=submit class="search-form-submit btn btn-flat" onclick=return!1><i class="icon icon-search"></i></button></span></div><div class=ins-search><div class=ins-search-mask></div><div class=ins-search-container><div class=ins-input-wrapper><input type=text class=ins-search-input placeholder=想要查找什么... x-webkit-speech>
+<button type=button class="close ins-close ins-selectable" data-dismiss=modal aria-label=Close><span aria-hidden=true>×</span></button></div><div class=ins-section-wrapper><div class=ins-section-container></div></div></div></div></form></div><button class="navbar-toggle collapsed" type=button data-toggle=collapse data-target=#main-navbar aria-controls=main-navbar aria-expanded=false>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span></button></div><nav id=main-navbar class="collapse navbar-collapse" itemscope itemtype=http://schema.org/SiteNavigationElement role=navigation><ul class="nav navbar-nav main-nav"><li class="menu-item menu-item-home"><a href=/><i class="icon icon-home-fill"></i>
+<span class=menu-title>首页</span></a></li><li class="menu-item menu-item-archives"><a href=/posts><i class="icon icon-archives-fill"></i>
+<span class=menu-title>归档</span></a></li><li class="menu-item menu-item-categories"><a href=/categories><i class="icon icon-folder"></i>
+<span class=menu-title>分类</span></a></li><li class="menu-item menu-item-tags"><a href=/tags><i class="icon icon-tags"></i>
+<span class=menu-title>标签</span></a></li><li class="menu-item menu-item-links"><a href=/links><i class="icon icon-friendship"></i>
+<span class=menu-title>友链</span></a></li><li class="menu-item menu-item-about"><a href=/about><i class="icon icon-cup-fill"></i>
+<span class=menu-title>关于</span></a></li></ul></nav></div></header><aside class=sidebar itemscope itemtype=http://schema.org/WPSideBar><div class=slimContent><div class=widget><h3 class=widget-title>公告</h3><div class=widget-body><div id=board><div class=content><p>欢迎交流与分享经验!~</p></div></div></div></div><div class=widget><h3 class=widget-title>分类</h3><div class=widget-body><ul class=category-list><li class=category-list-item><a href=/categories/AI/ class=category-list-link>AI</a><span class=category-list-count>6</span></li><li class=category-list-item><a href=/categories/Go/ class=category-list-link>Go</a><span class=category-list-count>2</span></li><li class=category-list-item><a href=/categories/Laravel/ class=category-list-link>Laravel</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/PHP/ class=category-list-link>PHP</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/go%E5%9F%BA%E7%A1%80%E5%BA%93/ class=category-list-link>go基础库</a><span class=category-list-count>52</span></li><li class=category-list-item><a href=/categories/php7/ class=category-list-link>php7</a><span class=category-list-count>5</span></li><li class=category-list-item><a href=/categories/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9C%8B%E7%9A%84NGINX/ class=category-list-link>写给大忙人看的NGINX</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9C%8B%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B9%A6%E7%B3%BB%E7%B1%BB/ class=category-list-link>写给大忙人看的技术书系类</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%89%8D%E7%AB%AF/ class=category-list-link>前端</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/ class=category-list-link>区块链</a><span class=category-list-count>2</span></li><li class=category-list-item><a href=/categories/%E5%BC%80%E5%8F%91/ class=category-list-link>开发</a><span class=category-list-count>17</span></li><li class=category-list-item><a href=/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/ class=category-list-link>微服务</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E6%9E%B6%E6%9E%84/ class=category-list-link>架构</a><span class=category-list-count>1</span></li></ul></div></div><div class=widget><h3 class=widget-title>标签</h3><div class=widget-body><ul class=tag-list><li class=tag-list-item><a href=/tags/Hardhat/ class=tag-list-link>Hardhat</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/JAX/ class=tag-list-link>JAX</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/LLM/ class=tag-list-link>LLM</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/NFT/ class=tag-list-link>NFT</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Php-Storm/ class=tag-list-link>Php-Storm</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Predis/ class=tag-list-link>Predis</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Solidity/ class=tag-list-link>Solidity</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/ddd/ class=tag-list-link>ddd</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/docker/ class=tag-list-link>docker</a><span class=tag-list-count>4</span></li><li class=tag-list-item><a href=/tags/gemma/ class=tag-list-link>gemma</a><span class=tag-list-count>5</span></li><li class=tag-list-item><a href=/tags/go/ class=tag-list-link>go</a><span class=tag-list-count>57</span></li><li class=tag-list-item><a href=/tags/hexo/ class=tag-list-link>hexo</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/kerasNLP/ class=tag-list-link>kerasNLP</a><span class=tag-list-count>3</span></li><li class=tag-list-item><a href=/tags/laravel/ class=tag-list-link>laravel</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/linux/ class=tag-list-link>linux</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/nginx/ class=tag-list-link>nginx</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/nuxt/ class=tag-list-link>nuxt</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/php/ class=tag-list-link>php</a><span class=tag-list-count>5</span></li><li class=tag-list-item><a href=/tags/redis/ class=tag-list-link>redis</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/rust/ class=tag-list-link>rust</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/swoole/ class=tag-list-link>swoole</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/xdebug/ class=tag-list-link>xdebug</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E4%BB%A5%E5%A4%AA%E5%9D%8A/ class=tag-list-link>以太坊</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E6%80%BB%E7%BB%93/ class=tag-list-link>总结</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/ class=tag-list-link>智能合约</a><span class=tag-list-count>1</span></li></ul></div></div><div class=widget><h3 class=widget-title>最新文章</h3><div class=widget-body><ul class="recent-post-list list-unstyled no-thumbnail"><li><div class=item-inner><p class=item-title><a href=/2024/04/20/Gemma-JAX-inference.html class=title>Gemma JAX 推理</a></p><p class=item-date><time datetime="2024-04-20 23:10:39 +0000 UTC" itemprop=datePublished>2024-04-20</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html class=title>在使用 Keras 进行 Gemma 模型的分布式微调和推理</a></p><p class=item-date><time datetime="2024-03-30 22:32:29 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html class=title>在 Keras 中使用 LoRA 微调 Gemma 模型</a></p><p class=item-date><time datetime="2024-03-30 21:42:12 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Get-started-with-Gemma-using-KerasNLP.html class=title>使用 KerasNLP 快速开始 Gemma</a></p><p class=item-date><time datetime="2024-03-30 19:20:02 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/24/Google-Gemma-2B-fine-tuning-practice-IT-technology-news-headline-generation.html class=title>Google Gemma 2B 微调实战（IT科技新闻标题生成）</a></p><p class=item-date><time datetime="2024-03-24 20:41:58 +0000 UTC" itemprop=datePublished>2024-03-24</time></p></div></li></ul></div></div></div></aside><aside class="sidebar sidebar-toc collapse" id=collapseToc itemscope itemtype=http://schema.org/WPSideBar><div class=slimContent><h4 class=toc-title>文章目录</h4><nav id=toc class="js-toc toc"></nav></div></aside><main class=main role=main><div class=content><article id=- class="article article-type-" itemscope itemtype=http://schema.org/BlogPosting><div class=article-header><h1 itemprop=name><a class=article-title href=/2022/03/03/getting-started-with-ethereum-smart-contracts-with-hardhat.html>使用 Hardhat 入门以太坊智能合约</a></h1><div class=article-meta><span class=article-date><i class="icon icon-calendar-check"></i>&nbsp;
+<a href=/2022/03/03/getting-started-with-ethereum-smart-contracts-with-hardhat.html class=article-date><time datetime="2022-03-03 00:53:25 +0000 UTC" itemprop=datePublished>2022-03-03</time></a></span>
+<span class=article-category><i class="icon icon-folder"></i>&nbsp;
+<a class=article-category-link href=/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/>区块链</a></span>
+<span class=article-tag><i class="icon icon-tags"></i>&nbsp;
+<a class=article-tag-link href=/tags/Hardhat/>Hardhat</a>
+<a class=article-tag-link href=/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/>智能合约</a>
+<a class=article-tag-link href=/tags/%E4%BB%A5%E5%A4%AA%E5%9D%8A/>以太坊</a>
+<a class=article-tag-link href=/tags/Solidity/>Solidity</a></span>
+<span class=post-comment><i class="icon icon-comment"></i>&nbsp;<a href=/2022/03/03/getting-started-with-ethereum-smart-contracts-with-hardhat.html#comments class=article-comment-link>评论</a></span>
+<span class="post-wordcount hidden-xs" itemprop=wordCount>字数统计: 7064字</span>
+<span class="post-readcount hidden-xs" itemprop=timeRequired>阅读时长: 15分</span></div></div><div class="article-entry marked-body js-toc-content" itemprop=articleBody><h2 id=0x1-概述>0x1 概述</h2><p>我在入门以太坊智能合约开发时，首先我就面临了一个选择，Hardhat Vs Truffle Vs Remix，我应该选择哪个开发工具。我就在谷歌上搜索很多对比，其中霍利维尔·瓦尔迪兹 的 《<a href=https://theblockchainguy.dev/hardhat-vs-truffle-vs-remix>Hardhat Vs Truffle Vs Remix - Which Is The Best For Blockchain Development?</a>》
+这篇文章很及时的帮助了我，并且OpenZeppelin、Aave、BitGo、1inch等都在使用该开发工具，而且我在深入了解官方文档后发现文档整体很清晰并且有条理，而我又有一定的前端开发经验，所以在开发工具的选型上我选择了 Hardhat 。如果你没有前端经验，希望在前期学习的时候更关注合约本身，那么我会推荐 Remix 作为前期学习的开发工具。
+这是我基于 Hardhat 官方教程写的第一篇以太坊合约和 dApp 开发指南，未来我也会持续分享所学。</p><h2 id=0x2-搭建环境>0x2 搭建环境</h2><p>首先 Hardhat 是基于 JavaScript 编写的，所以我们首先需要安装 Node.js 环境。</p><h3 id=安装-nodejs>安装 Node.js</h3><p>如果你已经安装了 Node.js 你可以跳过这个部分。如果没有，接下来会介绍如何在 Ubuntu、MacOS和 Windows 上安装它。</p><h4 id=linux>Linux</h4><h5 id=ubuntu>Ubuntu</h5><p>将以下命令复制粘贴到终端：</p><pre><code class=language-bash>sudo apt update
+sudo apt install curl git
+curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+sudo apt install nodejs
+</code></pre><h4 id=macos>MacOS</h4><p>确保你已经安装了 git ,如果没有安装可以参考 atlassian 写的 《<a href=https://www.atlassian.com/git/tutorials/install-git>Install Git</a>》。
+在 MacOS 上安装 Node.js 有多种方法。我选择了使用 Node 版本管理器（<a href=http://github.com/creationix/nvm>nvm</a>）。将以下命令复制粘贴到终端：</p><pre><code class=language-bash>curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+nvm install --lts
+nvm use stable
+nvm alias default stable
+npm install npm --global # 升级 npm 到最新版本
+</code></pre><h4 id=windows>Windows</h4><p>Windows 可以直接到 <a href=https://nodejs.org/en/>Node.js 官网</a>，下载对应的安装包即可完成安装。</p><h2 id=0x3-创建一个新的项目>0x3 创建一个新的项目</h2><p>我们将使用 npm CLI 来安装 Hardhat。
+打开终端并运行以下命令：</p><pre><code class=language-bash>mkdir hardhat-tutorial
+cd hardhat-tutorial
+npm init --yes
+npm install --save-dev hardhat
+</code></pre><blockquote><p>安装 Hardhat 的过程中会安装 Ethereum JavaScript 依赖项，所以请耐心等待。
+在安装 Hardhat 的同一目录下运行：</p></blockquote><pre><code class=language-bash>npx hardhat
+</code></pre><p>使用键盘选择 Create an empty hardhat.config.js 并按下回车键。</p><pre><code class=language-bash>$ npx hardhat
+888    888                      888 888               888
+888    888                      888 888               888
+888    888                      888 888               888
+8888888888  8888b.  888d888 .d88888 88888b.   8888b.  888888
+888    888     &quot;88b 888P&quot;  d88&quot; 888 888 &quot;88b     &quot;88b 888
+888    888 .d888888 888    888  888 888  888 .d888888 888
+888    888 888  888 888    Y88b 888 888  888 888  888 Y88b.
+888    888 &quot;Y888888 888     &quot;Y88888 888  888 &quot;Y888888  &quot;Y888
+
+👷 Welcome to Hardhat v2.9.1 👷‍
+
+? What do you want to do? …
+  Create a basic sample project
+  Create an advanced sample project
+  Create an advanced sample project that uses TypeScript
+❯ Create an empty hardhat.config.js
+  Quit
+</code></pre><p>当 Hardhat 运行时，它会从当前工作目录开始搜索最近的 <code>hardhat.config.js</code> 文件。这个文件通常在你的项目根目录，一个空的 <code>hardhat.config.js</code> 就足以让 Hardhat 工作。未来我们对 Hardhat 的全部设置都会在这个文件中。</p><h3 id=hardhat-架构>Hardhat 架构</h3><p>Hardhat 基于任务和插件的理念设计。而 Hardhat 的大部分功能都来自插件，作为开发人员，<a href=https://hardhat.org/plugins/>你可以自由选择</a>要使用的插件。</p><h4 id=任务>任务</h4><p>每次从 CLI 运行 Hardhat 时，你都在运行一项任务。例如 <code>npx hardhat compile</code> 命令就是运行 <code>compile</code> 任务。要查看项目当前可用的任务，只执行 <code>npx hardhat</code>。你也可以通过帮助命令了解其他任务 <code>npx hardhat help [task]</code>。</p><blockquote><p>当然我们也可以创建自定义的任务，参考<a href=https://hardhat.org/guides/create-task.html>创建任务</a>。</p></blockquote><h4 id=插件>插件</h4><p>在你最终使用什么工具方面，Hardhat 并不会限制你，但它确实带有一些内置的默认设置。所有这些也都可以被重写。
+在本文中，我们将使用 Ethers.js 和 Waffle 插件。它们将允许你与以太坊交互并测试你的合约。稍后我们将解释它们是如何使用的。要安装它们，你只需在项目目录中运行以下命令：</p><pre><code class=language-bash>npm install --save-dev @nomiclabs/hardhat-ethers ethers @nomiclabs/hardhat-waffle ethereum-waffle chai
+</code></pre><p>我们需要添加以下代码</p><pre><code class=language-javascript>require(&quot;@nomiclabs/hardhat-waffle&quot;);
+</code></pre><p>到如下位置，看起来会是这样：</p><pre><code class=language-javascript>require(&quot;@nomiclabs/hardhat-waffle&quot;);
+
+/**
+ * @type import('hardhat/config').HardhatUserConfig
+ */
+module.exports = {
+  solidity: &quot;0.7.3&quot;,
+};
+</code></pre><p>我们只需要引用 <code>hardhat-waffle</code>。</p><h2 id=0x4-编写与编译合约>0x4 编写与编译合约</h2><p>我们将创建一个简单的智能合约来实现代币转移。代币合约最常用于交换和存储价值。我们不会在本文中展开详细谈考合约中的 Solidity 代码，但是我们实现了一些你应该之大的逻辑：</p><ul><li>代币的总供应量时固定的，无法被改变</li><li>整个供应量分配到部署合约的地址</li><li>任何人都可以收到代币</li><li>任何拥有至少一个代币的人都可以转移代币</li><li>代币是不可分割的。你可以转移1、2、3或者37个代币，但不能转移2.5个</li></ul><blockquote><p>你可能听说过 ERC20，它是以太坊中的代币标准。DAI、USDC、MKR和ZRX等代币遵循 ERC20 标准，这使得它们都可以与任何可以处理 ERC20 代币的软件兼容。为简单起见，我们要构建的代币没有遵循 ERC20。</p></blockquote><h3 id=编写智能合约>编写智能合约</h3><p>首先创建一个名为新目录 <code>contracts</code>，并在该目录中创建一个名为 <code>Token.sol</code>。
+将下面的代码粘贴到该文件中，花一点时间阅读代码。它很简单，并且充满了解释 Solidity 基础知识的备注。</p><blockquote><p>要获得语法高亮，你应该在文本编辑器中添加 Solidity 语言的支持。只需寻找 Solidity 或 Ethereum 插件。我们建议使用 Visual Studio Code 或 Sublime Text 3。</p></blockquote><pre><code class=language-solidity>// Solidity 文件 第一行代码都会是 pragma
+// Solidity 编译器将使用它来验证对应的版本
+pragma solidity ^0.7.0;
+
+
+// 这是智能合约的主要组成部分
+contract Token {
+    // 一些字符串类型变量来标识代币
+    // `public` 修饰符使变量在合约外部可读
+    string public name = &quot;My Hardhat Token&quot;;
+    string public symbol = &quot;MHT&quot;;
+
+    // 存储在无符号整型变量中的固定数量代币
+    uint256 public totalSupply = 1000000;
+
+    // 地址类型变量用于存储以太坊账户
+    address public owner;
+
+    // `mapping` 是一个键/值映射。我们在这里存储每个帐户余额
+    mapping(address =&gt; uint256) balances;
+
+    /**
+     * 合约初始化
+     *
+     * `constructor` 只在合约创建时执行
+     */
+    constructor() {
+        // totalSupply 被分配给交易发送方，即部署合约的帐户
+        balances[msg.sender] = totalSupply;
+        owner = msg.sender;
+    }
+
+    /**
+     * 传递代币的函数
+     *
+     * `external` 修饰符使函数只能从合约外部调用
+     */
+    function transfer(address to, uint256 amount) external {
+        // 检查交易发送方是否有足够的代币
+        // 如果 `require` 的第一个参数计算结果为 `false``,则整个交易会恢复
+        require(balances[msg.sender] &gt;= amount, &quot;Not enough tokens&quot;);
+
+        // 转移金额
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+    }
+
+    /**
+     * 读取给定帐户的代币余额
+     *
+     * `view` 修饰符表示它不修改合约的状态，这允许我们在不执行交易的情况下调用它
+     */
+    function balanceOf(address account) external view returns (uint256) {
+        return balances[account];
+    }
+}
+</code></pre><blockquote><p><code>*.sol</code> 是 Solidity 的文件类型。我们建议将文件名与其包含的合约相匹配，这是一个常见的做法。</p></blockquote><h3 id=编译合同>编译合同</h3><p>编译合约，在你的终端中执行<code>npx hardhat compile</code>。该 <code>compile</code> 任务是内置任务之一。</p><pre><code class=language-bash>$ npx hardhat compile
+Compiling 1 file with 0.7.3
+Compilation finished successfully
+</code></pre><p>合约已经编译成功，现在你就可以使用了。</p><h2 id=0x5-测试合约>0x5 测试合约</h2><p>在构建智能合约时编写自动化测试是至关重要的，因为我们的代码将直接操作用户的钱！为此，我们将使用 Hardhat 网络，这是一个为开发而设计的本地以太坊网络，它内置在 Hardhat 工具中，并且是默认网络。你无需设置任何内容即可使用它。在我们的测试中，我们将使用 ethers.js 与我们在上节中构建的以太坊合约进行交互，并且使用 Mocha 作为我们的测试运行时。</p><h3 id=编写测试>编写测试</h3><p>在我们的项目根目录中创建名为<code>test</code>的目录，并在里面创建一个文件名为<code>Token.js</code>的文件。
+我们从下面的代码开始。我们将在接下来解释其中的含义，但现在你只需将其粘贴到 <code>Token.js</code> 中：</p><pre><code class=language-javascript>const { expect } = require(&quot;chai&quot;);
+
+describe(&quot;Token contract&quot;, function () {
+  it(&quot;Deployment should assign the total supply of tokens to the owner&quot;, async function () {
+    const [owner] = await ethers.getSigners();
+
+    const Token = await ethers.getContractFactory(&quot;Token&quot;);
+
+    const hardhatToken = await Token.deploy();
+
+    const ownerBalance = await hardhatToken.balanceOf(owner.address);
+    expect(await hardhatToken.totalSupply()).to.equal(ownerBalance);
+  });
+});
+</code></pre><p>在你的终端上运行 <code>npx hardhat test</code>，你应该看到以下输出：</p><pre><code class=language-bash>npx hardhat test
+
+  Token contract
+    ✓ Deployment should assign the total supply of tokens to the owner (654ms)
+
+
+  1 passing (663ms)
+</code></pre><p>这意味着测试通过了。现在让我们解释每一行：</p><pre><code class=language-javascript>const [owner] = await ethers.getSigners();
+</code></pre><p><code>Signer</code> 代表 ethers.js 中以太坊的对象。 它用于向合约和其他账户发送交易。在这里，我们得到了所连接节点中的账户列表，在本例中时Hardhat 网络，并且只保留第一个。</p><p>该<code>ethers</code>变量在全局范围内可用。你可以在顶部添加这么一行：</p><pre><code class=language-javascript>const { ethers } = require(&quot;hardhat&quot;);
+</code></pre><blockquote><p>要了解更多关于<code>Singer</code>的信息，你可以查看 <a href=https://docs.ethers.io/v5/api/signer/>Signers 文档</a>。</p></blockquote><pre><code class=language-javascript>const Token = await ethers.getContractFactory(&quot;Token&quot;);
+</code></pre><p>在 ethers.js 中，<code>ContractFactory</code> 是一个用于部署新智能合约的抽象，所以这里的 <code>Token</code>是我们的代币合约工厂的实例。</p><pre><code class=language-javascript>const hardhatToken = await Token.deploy();
+</code></pre><p>在 ContractFactory 上调用<code>deploy()</code>将开始部署，并返回<code>Contract</code>解析后的 <code>Promise</code>。这是为你的每个智能合约功能提供方法的对象。</p><pre><code class=language-javascript>const ownerBalance = await hardhatToken.balanceOf(owner.address);
+</code></pre><p>一旦部署了合约，我们就可以在<code>hardhatToken</code>上调用我们的合约方法，并通过调用<code>balanceOf()</code>来获取相应所有者帐户的余额。</p><p>请记住，获得整个供应量的代币所有者是进行部署的账户，当使用<code>hardhat-ethers</code>插件时，<code>ContractFactory</code>和<code>Contract</code>实例默认连接到第一个签名者。这意味着<code>owner</code>变量中的账户执行了部署，而<code>balanceOf()</code>应该返回整个供应量。</p><pre><code class=language-javascript>expect(await hardhatToken.totalSupply()).to.equal(ownerBalance);
+</code></pre><p>在这里，我们再次使用我们的<code>Contract</code>实例来调用 Solidity 代码中的智能合约函数。<code>totalSupply()</code>返回代币的供应量，我们检查它是否等于<code>ownerBalance</code>，正如它应该做的那样。</p><p>为了做到这一点，我们使用了 <a href=https://www.chaijs.com/>Chai</a>，这是一个断言库。这些断言函数被称为 &ldquo;匹配器&rdquo;，而我们在这里使用的函数实际上来自 <a href=https://getwaffle.io/>Waffle</a>。这就是为什么我们要使用<code>hardhat-waffle</code>插件，它使我们更容易从Ethereum 断言值。请查看 Waffle 文档中的<a href=https://ethereum-waffle.readthedocs.io/en/latest/matchers.html>这一节</a>，了解整个以太坊特定匹配器的列表。</p><h4 id=使用其他帐户>使用其他帐户</h4><p>如果你需要从默认账户（或ethers.js中的<code>Signer</code>）以外的账户发送交易来测试你的代码，你可以使用ethers.js <code>Contract</code>中的<code>connect()</code>方法将其连接到一个不同的账户。像这样：</p><pre><code class=language-javascript>const { expect } = require(&quot;chai&quot;);
+
+describe(&quot;Transactions&quot;, function() {
+  it(&quot;Should transfer tokens between accounts&quot;, async function() {
+    const [owner, addr1, addr2] = await ethers.getSigners();
+
+    const Token = await ethers.getContractFactory(&quot;Token&quot;);
+
+    const hardhatToken = await Token.deploy();
+
+    //  从所有者转移50个代币到addr1
+    await hardhatToken.transfer(addr1.address, 50);
+    expect(await hardhatToken.balanceOf(addr1.address)).to.equal(50);
+
+    // 从addr1转移50个代币到addr2
+    await hardhatToken.connect(addr1).transfer(addr2.address, 50);
+    expect(await hardhatToken.balanceOf(addr2.address)).to.equal(50);
+  });
+});
+</code></pre><h4 id=完全覆盖>完全覆盖</h4><p>现在我们已经介绍了测试合约所需的基础知识，这里有一个完整的代币测试套件，其中包含有关 Mocha 以及如何构建测试的大量附加信息。我们建议通读。</p><pre><code class=language-javascript>// 我们在这里导入Chai以使用它的断言函数
+const { expect } = require(&quot;chai&quot;);
+
+// `describe` 是一个Mocha函数，它允许您组织测试
+// 实际上并不需要这样做，但是组织测试会使调试变得更容易。所有的Mocha函数都可以在全局作用域中使用
+
+// `describe` 参数为一个测试名称和一个回调函数
+// 回调必须定义该部分的测试。这个回调函数不能是一个异步函数
+describe(&quot;Token contract&quot;, function () {
+  // Mocha 有四个函数可以让你能在整个测试生命周期中进行不同的操作，
+  // 它们是： `before`, `beforeEach`, `after`, `afterEach`
+
+  // 它们在设置测试环境和运行后清理环境方面非常有用
+
+  // 一个常见的模式是声明一些变量，并在 `before` 和 `beforeEach` 回调中分配它们
+
+  let Token;
+  let hardhatToken;
+  let owner;
+  let addr1;
+  let addr2;
+  let addrs;
+
+  // `beforeEach` 将在每次测试之前运行，每次重新部署合约。它接收回调，可以是异步的
+  beforeEach(async function () {
+    // 在这里获取 ContractFactory 和签名者
+    Token = await ethers.getContractFactory(&quot;Token&quot;);
+    [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
+
+    // 要部署我们的合约，只需调用 Token.deploy() 并等待它被 deployed()，一旦它的交易被挖掘，就会发生部署
+    hardhatToken = await Token.deploy();
+  });
+
+  // 你可以嵌套 describe 调用来创建小结
+  describe(&quot;Deployment&quot;, function () {
+    // `it` 是 MoCha 函数，这是用来定义测试的工具。它接收测试名和回调函数
+
+    // 如果回调函数是一步的，Mocha 将 `await`
+    it(&quot;Should set the right owner&quot;, async function () {
+      // Expect 接收一个值，并将其包装在Assertion对象中。这些对象有很多实用方法来断言值
+
+      // 这个测试期望存储在合约中的所有者变量等于我们部署合约时候的所有者
+      expect(await hardhatToken.owner()).to.equal(owner.address);
+    });
+
+    it(&quot;Should assign the total supply of tokens to the owner&quot;, async function () {
+      const ownerBalance = await hardhatToken.balanceOf(owner.address);
+      expect(await hardhatToken.totalSupply()).to.equal(ownerBalance);
+    });
+  });
+
+  describe(&quot;Transactions&quot;, function () {
+    it(&quot;Should transfer tokens between accounts&quot;, async function () {
+      // 将50个代币从所有者转移到 addr1
+      await hardhatToken.transfer(addr1.address, 50);
+      const addr1Balance = await hardhatToken.balanceOf(addr1.address);
+      expect(addr1Balance).to.equal(50);
+
+      // 将50个代币从 addr1 转移到 addr2
+      // 我们使用.connect(签名者)从另一个帐户发送交易
+      await hardhatToken.connect(addr1).transfer(addr2.address, 50);
+      const addr2Balance = await hardhatToken.balanceOf(addr2.address);
+      expect(addr2Balance).to.equal(50);
+    });
+
+    it(&quot;Should fail if sender doesn’t have enough tokens&quot;, async function () {
+      const initialOwnerBalance = await hardhatToken.balanceOf(owner.address);
+
+      // 尝试从 addr1 (0 代币)发送1个代表给所有者(1000000 代币)。
+      // `require`将计算为 false 并恢复交易
+      await expect(
+        hardhatToken.connect(addr1).transfer(owner.address, 1)
+      ).to.be.revertedWith(&quot;Not enough tokens&quot;);
+
+      // 所有者余额不应该改变
+      expect(await hardhatToken.balanceOf(owner.address)).to.equal(
+        initialOwnerBalance
+      );
+    });
+
+    it(&quot;Should update balances after transfers&quot;, async function () {
+      const initialOwnerBalance = await hardhatToken.balanceOf(owner.address);
+
+      // 将100个代币从所有者转移到 addr1
+      await hardhatToken.transfer(addr1.address, 100);
+
+      // 将另外50个代币从所有者转移到addr2
+      await hardhatToken.transfer(addr2.address, 50);
+
+      // 检查余额
+      const finalOwnerBalance = await hardhatToken.balanceOf(owner.address);
+      expect(finalOwnerBalance).to.equal(initialOwnerBalance.sub(150));
+
+      const addr1Balance = await hardhatToken.balanceOf(addr1.address);
+      expect(addr1Balance).to.equal(100);
+
+      const addr2Balance = await hardhatToken.balanceOf(addr2.address);
+      expect(addr2Balance).to.equal(50);
+    });
+  });
+});
+</code></pre><p>这就是<code>npx hardhat test</code>完整测试套件的输出，是这样的：</p><pre><code class=language-bash>$ npx hardhat test
+
+  Token contract
+    Deployment
+      ✓ Should set the right owner
+      ✓ Should assign the total supply of tokens to the owner
+    Transactions
+      ✓ Should transfer tokens between accounts (199ms)
+      ✓ Should fail if sender doesn’t have enough tokens
+      ✓ Should update balances after transfers (111ms)
+
+
+  5 passing (1s)
+</code></pre><p>请记住，当你运行<code>npx hardhat test</code>时，如果你的合约自上次运行测试以来发生更改，则将编译它们。</p><h2 id=0x6-使用-hardhat-网络进行调试>0x6 使用 Hardhat 网络进行调试</h2><p>Hardhat 内置了Hardhat 网络，这是一个专为开发而设计的本地以太坊网络。它允许你部署合约、运行测试和调试代码。这是 Hardhat 连接的默认网络，因此你无需进行任何设置即可使其正常工作。只需运行你的测试。</p><h3 id=solidity-consolelog>Solidity <code>console.log</code></h3><p>在 Hardhat 网络上运行合约和测试时，你可以在 Solidity 代码中使用<code>console.log()</code>来打印日志消息与合约变量。要使用它，你必须在你的合约代码中导入 <code>hardhat/console.sol</code>。</p><pre><code class=language-solidity>pragma solidity ^0.8.0;
+
+import &quot;hardhat/console.sol&quot;;
+
+contract Token {
+  //...
+}
+</code></pre><p>像在 JavaScript 中使用<code>console.log</code>那样在<code>transfer()</code>函数添加一些内容：</p><pre><code class=language-solidity>function transfer(address to, uint256 amount) external {
+    console.log(&quot;Sender balance is %s tokens&quot;, balances[msg.sender]);
+    console.log(&quot;Trying to send %s tokens to %s&quot;, amount, to);
+
+    require(balances[msg.sender] &gt;= amount, &quot;Not enough tokens&quot;);
+
+    balances[msg.sender] -= amount;
+    balances[to] += amount;
+}
+</code></pre><p>运行测试时将显示日志输出：</p><pre><code class=language-bash>$ npx hardhat test
+
+  Token contract
+    Deployment
+      ✓ Should set the right owner
+      ✓ Should assign the total supply of tokens to the owner
+    Transactions
+Sender balance is 1000 tokens
+Trying to send 50 tokens to 0xead9c93b79ae7c1591b1fb5323bd777e86e150d4
+Sender balance is 50 tokens
+Trying to send 50 tokens to 0xe5904695748fe4a84b40b3fc79de2277660bd1d3
+      ✓ Should transfer tokens between accounts (373ms)
+      ✓ Should fail if sender doesn’t have enough tokens
+Sender balance is 1000 tokens
+Trying to send 100 tokens to 0xead9c93b79ae7c1591b1fb5323bd777e86e150d4
+Sender balance is 900 tokens
+Trying to send 100 tokens to 0xe5904695748fe4a84b40b3fc79de2277660bd1d3
+      ✓ Should update balances after transfers (187ms)
+
+
+  5 passing (2s)
+</code></pre><p>查看<a href=https://hardhat.org/hardhat-network/#console-log>文档</a>以了解有关此功能的更多信息。</p><h2 id=0x7-部署到真实网络>0x7 部署到真实网络</h2><p>一旦你准备好与其他人分享你的 dApp，你可能想要做的就是部署到真实的网络。这样，其他人就可以访问你的 dApp了。</p><p>涉及真钱交易的以太坊网络，被称为“mainnet”，然而还有其他不与真钱交易的网络，但却能很好的模拟现实世界的场景，也可以被其他人访问的网络称为“testnets”。以太坊有多个测试网:Ropsten、Kovan、Rinkeby和Goerli。我们建议将合约部署到 Ropsten 测试网。</p><p>在软件层面，部署到测试网与部署到主网是一样的。唯一的区别是你连接到哪个网络。让我们看看使用ether.js部署合约的代码是什么样子的。</p><p>使用的主要概念是<code>Signer</code>、<code>ContractFactory</code>和<code>Contract</code>，我们在测试部分中解释过。与测试相比，没有什么新事情需要做，因为当在测试合约时，实际上是在向你的开发网络进行部署。这使得代码非常相似。</p><p>让我们在项目根目录中创建一个新的目录 <code>scripts</code>，并将以下内容粘贴到<code>deploy.js</code>文件中：</p><pre><code class=language-javascript>async function main() {
+  const [deployer] = await ethers.getSigners();
+
+  console.log(&quot;Deploying contracts with the account:&quot;, deployer.address);
+
+  console.log(&quot;Account balance:&quot;, (await deployer.getBalance()).toString());
+
+  const Token = await ethers.getContractFactory(&quot;Token&quot;);
+  const token = await Token.deploy();
+
+  console.log(&quot;Token address:&quot;, token.address);
+}
+
+main()
+  .then(() =&gt; process.exit(0))
+  .catch((error) =&gt; {
+    console.error(error);
+    process.exit(1);
+</code></pre><p>要在运行任何任务时指定 Hardhat 连接到特定的以太坊网络，可以使用<code>--network</code>参数。像这样：</p><pre><code class=language-bash>npx hardhat run scripts/deploy.js --network &lt;network-name&gt;
+</code></pre><p>在这种情况下，不带<code>--network</code>参数运行它会使代码针在Hardhat 网络的嵌入式实例运行，因此当 Hardhat 完成运行时，部署实际上会丢失，但测试我们的部署代码是否有效仍然很有用：</p><pre><code class=language-bash>$ npx hardhat run scripts/deploy.js
+Deploying contracts with the account: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+Account balance: 10000000000000000000000
+Token address: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+</code></pre><h3 id=部署到远程网络>部署到远程网络</h3><p>要部署到远程网络（例如主网或任何测试网），你需要在<code>hardhat.config.js</code>文件中添加一个<code>network</code>条目。我们将在此示例中使用 Ropsten，但你也可以以类似地方式添加任何网络：</p><pre><code class=language-javascript>require(&quot;@nomiclabs/hardhat-waffle&quot;);
+
+// 登录https://www.alchemyapi.io，注册，
+// 在其仪表板中创建一个新的应用程序，并将“KEY”替换为其密钥
+const ALCHEMY_API_KEY = &quot;KEY&quot;;
+
+// 从 Metamask 导出你的私钥，打开Metamask，并进入帐户详细信息&gt;导出私钥
+// 千万注意，永远不要把真实的Ether转到测试帐户
+const ROPSTEN_PRIVATE_KEY = &quot;YOUR ROPSTEN PRIVATE KEY&quot;;
+
+module.exports = {
+  solidity: &quot;0.7.3&quot;,
+  networks: {
+    ropsten: {
+      url: `https://eth-ropsten.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
+      accounts: [`${ROPSTEN_PRIVATE_KEY}`]
+    }
+  }
+};
+</code></pre><p>我们正在使用<a href=https://www.alchemyapi.io/>Alchemy</a>，但指向任何以太坊节点或网关的<code>url</code>都可以工作。</p><p>要部署在Ropsten网络上，你需要将Ropsten-ETH发送到将要进行部署的地址。你可以从测试网的水龙头上得到一些ETH，这是一种免费分发测试ETH的服务。<a href=https://faucet.metamask.io/>这是Ropsten的一个水龙头</a>，你必须在交易之前将Metamask的网络更改为Ropsten。
+最后，运行：</p><pre><code class=language-bash>npx hardhat run scripts/deploy.js --network ropsten
+</code></pre><p>如果一切顺利，你应该会看到已部署的合约地址。</p><h2 id=0x8-模版项目>0x8 模版项目</h2><p>如果你想快速开始使用你的dApp，亦或者想通过前端查看整个项目，你可以使用以下demo项目库。
+<a href=https://github.com/nomiclabs/hardhat-hackathon-boilerplate>https://github.com/nomiclabs/hardhat-hackathon-boilerplate</a></p><h3 id=包括些什么>包括些什么</h3><ul><li>我们在本教程中使用的 Solidity 合约</li><li>使用 ethers.js 和 Waffle 的测试套件</li><li>使用 ethers.js 与合约交互的最小前端</li></ul><h3 id=solidity-合约和测试>Solidity 合约和测试</h3><p>在 repo 的根目录中，您会找到我们通过本教程与合约一起构建的Hardhat项目。<code>Token</code>刷新你对它实现的记忆：</p><ul><li>代币的总供应量是固定的，无法更改</li><li>整个供应分配到部署合约的地址</li><li>任何人都可以收到代币</li><li>任何拥有至少一个代币的人都可以转移代币</li><li>代币是不可分割的。你可以转移 1、2、3 或 37 个代币，但不能转移 2.5 个</li></ul><h3 id=前端应用>前端应用</h3><p>你会发现一个简单的应用程序，<code>frontend</code>它允许用户做两件事：</p><ul><li>检查已连接钱包的余额</li><li>将代币发送到地址
+这是一个单独的 npm 项目，它是使用<code>create-react-app</code>创建的，所以这意味着它使用了 <code>webpack</code> 和 <code>babel</code>。</li></ul><h3 id=前端文件架构>前端文件架构</h3><ul><li>`src/``包含所有代码<ul><li><code>src/components</code>包含反应组件<ul><li><code>Dapp.js</code>是唯一具有业务逻辑的文件。如果你将其用作模版，你可以在此处用你自己的代码替换</li><li>其他所有组件都只呈现 HTML，没有逻辑。</li><li><code>src/contracts</code>有合约的 ABI 和地址，这些是由部署脚本自动生成的</li></ul></li></ul></li></ul><h3 id=如何使用它>如何使用它</h3><p>首先克隆该库，然后部署合约：</p><pre><code class=language-bash>cd hardhat-hackathon-boilerplate
+npm install
+npx hardhat node
+</code></pre><p>在这里，我们只安装 npm 项目的依赖项，并通过运行<code>npx hardhat node</code>启动一个Hardhat 网络实例，你可以使用 MetaMask 连接到该实例。在同一目录中的不同终端中，运行：</p><pre><code class=language-bash>npx hardhat --network localhost run scripts/deploy.js
+</code></pre><p>这会将合约部署到Hardhat网络。完成后运行：</p><pre><code class=language-bash>cd frontend
+npm install
+npm run start
+</code></pre><p>启动react web app。打开http://localhost:3000/ ，你应该会看到：
+<img src=https://static.ganymedenil.com/2022/03/06/bv2ott76n8m1lrfgwjeersg1koke194d.jpg alt></p><p>在 MetaMask 中将你的网络设置为<code>localhost:8545</code>。 然后可能还需要配置 MetaMask 以与 Hardhat 配合使用。为此，请转到<code>Settings -> Networks -> Localhost 8545</code>并将链 ID 更改为 31337。</p><p>现在单击 Web 应用程序中的按钮。然后你应该看到这个：
+<img src=https://static.ganymedenil.com/2022/03/06/oycj93zk7upuqkr03m3gb5wkxhys4he7.jpg alt></p><p>这里发生的情况是显示当前钱包余额的前端代码检测到余额为0，因此你将无法尝试转账功能。通过运行：</p><pre><code class=language-bash>npx hardhat --network localhost faucet &lt;your address&gt;
+</code></pre><p>这将运行我们包含在Hardhat中的自定义任务，该任务使用部署帐户的余额向你的地址发送 100 MBT 和 1 ETH。这将允许你将代币发送到另一个地址。
+你可以查看<code>/tasks/faucet.js</code>中的任务代码。</p><pre><code class=language-bash>$ npx hardhat --network localhost faucet 0x0987a41e73e69f60c5071ce3c8f7e730f9a60f90
+Transferred 1 ETH and 100 tokens to 0x0987a41e73e69f60c5071ce3c8f7e730f9a60f90
+</code></pre><p>在你运行<code>npx hardhat node</code>的终端中，你也应该看到:</p><pre><code class=language-bash>eth_sendTransaction
+  Contract call:       Token#transfer
+  Transaction:         0x460526d98b86f7886cd0f218d6618c96d27de7c745462ff8141973253e89b7d4
+  From:                0xc783df8a850f42e7f7e57013759c285caa701eb6
+  To:                  0x7c2c195cd6d34b8f845992d380aadb2730bb9c6f
+  Value:               0 ETH
+  Gas used:            37098 of 185490
+  Block #8:            0x6b6cd29029b31f30158bfbd12faf2c4ac4263068fd12b6130f5655e70d1bc257
+
+  console.log:
+    Transferring from 0xc783df8a850f42e7f7e57013759c285caa701eb6 to 0x0987a41e73e69f60c5071ce3c8f7e730f9a60f90 100 tokens
+</code></pre><p>在我们的合约中显示<code>transfer()</code>函数的<code>console.log</code>输出，这是运行水龙头任务后web应用程序的样子:
+<img src=https://static.ganymedenil.com/2022/03/06/58froxay9dz5lbysmno2ibxyi6hwo370.jpg alt></p><p>试着调试它并阅读代码。它充满了注释，解释正在发生的事情，并清楚地表明哪些代码是以太坊模版代码，哪些实际上是dApp逻辑。这将使该项目易于为你的项目重用。</p><h2 id=0x9-结束语>0x9 结束语</h2><p>恭喜你完成了本教程！
+以下是一些补充链接，让你更深入了解：</p><ul><li><a href=https://github.com/nomiclabs/hardhat-hackathon-boilerplate>Hardhat&rsquo;s Hackathon Boilerplate</a></li><li><a href=https://hardhat.org/getting-started/>Hardhat&rsquo;s documentation site</a></li><li><a href=https://hardhat.org/discord>Hardhat Support Discord server</a></li><li><a href=https://docs.ethers.io/>Ethers.js Documentation</a></li><li><a href=https://getwaffle.io/>Waffle Documentation</a></li><li><a href=https://mochajs.org/>Mocha Documentation</a></li><li><a href=https://www.chaijs.com/>Chai Documentation</a></li></ul></div><div class=article-footer><blockquote class=mt-2x><ul class="post-copyright list-unstyled"><li class="post-copyright-link hidden-xs"><strong>本文链接:</strong>
+<a href=https://www.ganymedenil.com/2022/03/03/getting-started-with-ethereum-smart-contracts-with-hardhat.html title="使用 Hardhat 入门以太坊智能合约" target=_blank rel=external>https://www.ganymedenil.com/2022/03/03/getting-started-with-ethereum-smart-contracts-with-hardhat.html</a></li><li class=post-copyright-license><strong>版权声明：</strong><a href=http://creativecommons.org/licenses/by/4.0/deed.zh target=_blank rel=external>本博客所有文章除特别声明外，均采用 CC BY 4.0 CN协议 许可协议。转载请注明出处</a></li></ul></blockquote><div class="panel panel-default panel-badger"><div class=panel-body><figure class=media><div class=media-left><a href=https://github.com/GanymedeNil target=_blank class="img-burn thumb-sm visible-lg"><img src=/avatar.png class="img-rounded w-full" alt></a></div><div class=media-body><h3 class=media-heading><a href=https://github.com/GanymedeNil target=_blank><span class=text-dark>Ganymede Nil</span><small class=ml-1x>Developer</small></a></h3><div>喜欢新事物，关注后端动态，对新的技术有追求； 喜欢 coding。</div></div></figure></div></div></div></article><section id=comments><div id=vcomments></div></section></div><nav class="bar bar-footer clearfix" data-stick-bottom><div class=bar-inner><ul class="pager pull-left"><li class=prev><a href=/2021/11/09/ntf-dabt-part-1.html title="NFT 数字艺术品  part 1"><i class="icon icon-angle-left" aria-hidden=true></i><span>&nbsp;&nbsp;下一篇</span></a></li><li class=next><a href=/2022/04/22/what-are-microservices.html title=我的微服务总结><span>上一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden=true></i></a></li><li class=toggle-toc><a class="toggle-btn collapsed" data-toggle=collapse href=#collapseToc aria-expanded=false title=文章目录 role=button><span>[&nbsp;</span><span>文章目录</span>
+<i class="text-collapsed icon icon-anchor"></i>
+<i class="text-in icon icon-close"></i>
+<span>]</span></a></li></ul><button type=button class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle=modal data-target=#donateModal><span>赏</span></button><div class=bar-right><div class=share-component data-sites=weibo,qq,wechat,facebook,twitter data-mobile-sites=weibo,qq,qzone></div></div></div></nav><div class="modal modal-center modal-small modal-xs-full fade" id=donateModal tabindex=-1 role=dialog><div class=modal-dialog role=document><div class="modal-content donate"><button type=button class=close data-dismiss=modal aria-label=Close><span aria-hidden=true>&#215;</span></button><div class=modal-body><div class=donate-box><div class=donate-head><p>感谢您的支持,我会继续努力的!</p></div><div class=tab-content><div role=tabpanel class="tab-pane fade active in" id=alipay><div class=donate-payimg><img src=/donate/alipay.jpg alt=扫码支持 title=扫一扫></div><p class="text-muted mv">扫码打赏, 多少你说了算~</p><p class=text-grey>打开支付宝扫一扫，即可进行扫码打赏哦~</p></div><div role=tabpanel class="tab-pane fade" id=wechatpay><div class=donate-payimg><img src=/donate/weipay.jpg alt=扫码支持 title=扫一扫></div><p class="text-muted mv">扫码打赏, 多少你说了算~</p><p class=text-grey>打开微信扫一扫，即可进行扫码打赏哦</p></div></div><div class=donate-footer><ul class="nav nav-tabs nav-justified" role=tablist><li role=presentation class=active><a href=#alipay id=alipay-tab role=tab data-toggle=tab aria-controls=alipay aria-expanded=true><i class="icon icon-alipay"></i> 支付宝</a></li><li role=presentation><a href=#wechatpay role=tab id=wechatpay-tab data-toggle=tab aria-controls=wechatpay aria-expanded=false><i class="icon icon-wepay"></i>
+微信支付</a></li></ul></div></div></div></div></div></div></main><footer class=footer itemscope itemtype=http://schema.org/WPFooter><ul class=social-links><li><a href=https://github.com/GanymedeNil target=_blank title=github data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li><li><a href=/index.xml target=_blank title=rss data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li><li><a href=http://weibo.com/jinhongyang target=_blank title=weibo data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li></ul><div class=copyright>&copy;2017 -
+2024<div class=publishby>Theme by <a href=https://github.com/cofess target=_blank>cofess </a>base on<a href=https://github.com/cofess/hexo-theme-pure target=_blank> pure</a>.</div><div>powered by <a href=https://gohugo.io/ target=_blank>hugo</a></div><div class=beian><a href=http://beian.miit.gov.cn/ target=_blank>京ICP备17030231号-2</a></div><div class=youpaiyun>本站CDN提供商<br><a href="https://www.upyun.com/?utm_source=lianmeng&utm_medium=referral" target=_blank><img src=/upyun.png width=100px alt=又拍云></a></div></div></footer><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_SVG"></script>
+<script type=text/x-mathjax-config>
+    MathJax.Hub.Config({
+            showMathMenu: false, //disables context menu
+            tex2jax: {
+            inlineMath: [ ['$','$'], ['\\(','\\)'] ]
+           }
+    });
+</script><script src=https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js></script>
+<script>window.jQuery||document.write('<script src="js/jquery.min.js"><\/script>')</script><script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/php.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/bash.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/cmake.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/dockerfile.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/json.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/lua.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/makefile.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/nginx.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/rust.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/shell.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/yaml.min.js defer></script><script>hljs.configure({tabReplace:"    ",classPrefix:""}),hljs.initHighlightingOnLoad()</script>
+<script src=/js/application.min.7ef841188add421ff966768c2e5f1a1551076353a65f0d39fbaf504b456936f8.js></script>
+<script src=/js/plugin.min.738a460bf4317fac61717f1bca393e53d00973db9754d9f0a81c7312d5874840.js></script>
+<script>(function(e){var t={TRANSLATION:{POSTS:"文章",PAGES:"页面",CATEGORIES:"分类",TAGS:"标签",UNTITLED:"(未命名)"},ROOT_URL:"https://www.ganymedenil.com",CONTENT_URL:"https://www.ganymedenil.com/searchindex.json "};e.INSIGHT_CONFIG=t})(window)</script><script type=text/javascript src=/js/insight.min.716b0c6a00b68ccc31a2b65345f3412f4246ffa94a90f8e25d525528b4504f9937880692bbe619023233caba5d0a17ebe23d7cfb57cd3a88f23ea337ad5e4d00.js defer></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js></script>
+<script>tocbot.init({tocSelector:".js-toc",contentSelector:".js-toc-content",headingSelector:"h1, h2, h3",hasInnerContainers:!0})</script><script src=https://cdn1.lncld.net/static/js/3.0.4/av-min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/valine></script>
+<script type=text/javascript>var GUEST=["nick","mail","link"],meta="nick,mail",meta=meta.split(",").filter(function(e){return GUEST.indexOf(e)>-1});new Valine({el:"#vcomments",verify:null,notify:null,appId:"lI57bh1xqblhjL3OUrOcnX2R-gzGzoHsz",appKey:"2aCHvIxz6nKXqP0sBq42gBhC",placeholder:"enjoy~",avatar:"mm",meta,pageSize:"10"||10,visitor:!1})</script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-140810980-1"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","UA-140810980-1")</script></body></html>

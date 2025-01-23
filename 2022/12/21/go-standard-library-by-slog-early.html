@@ -1,0 +1,261 @@
+<!doctype html><html lang=zh><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>Go slog 日志包尝鲜 - ZA TAN</title><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui"><meta name=renderer content="webkit"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="black"><meta name=format-detection content="telephone=no,email=no,adress=no"><meta name=theme-color content="#000000"><meta http-equiv=window-target content="_top"><meta name=description content="slog 是 Go 团队开发的一个实验性日志包，它提供了结构化日志记录的功能。 注意：当前该包还未在Go基础库中包含。
+"><meta name=generator content="Hugo 0.110.0 with theme pure"><title>Go slog 日志包尝鲜 - ZA TAN</title><link rel=icon href=/favicon.png type=image/x-icon><link rel=stylesheet href=/css/style.min.c58e22f1aa6179cd5cb60b9e08421a2b9a9c9fe9352d095e051b51aae209e5c0.css><link rel=stylesheet href=https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css async><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css async><meta property="og:title" content="Go slog 日志包尝鲜"><meta property="og:description" content="slog 是 Go 团队开发的一个实验性日志包，它提供了结构化日志记录的功能。
+注意：当前该包还未在Go基础库中包含。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.ganymedenil.com/2022/12/21/go-standard-library-by-slog-early.html"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-12-21T11:06:00+00:00"><meta property="article:modified_time" content="2022-12-21T11:06:00+00:00"><meta itemprop=name content="Go slog 日志包尝鲜"><meta itemprop=description content="slog 是 Go 团队开发的一个实验性日志包，它提供了结构化日志记录的功能。
+注意：当前该包还未在Go基础库中包含。"><meta itemprop=datePublished content="2022-12-21T11:06:00+00:00"><meta itemprop=dateModified content="2022-12-21T11:06:00+00:00"><meta itemprop=wordCount content="1234"><meta itemprop=keywords content="go,"><meta name=twitter:card content="summary"><meta name=twitter:title content="Go slog 日志包尝鲜"><meta name=twitter:description content="slog 是 Go 团队开发的一个实验性日志包，它提供了结构化日志记录的功能。
+注意：当前该包还未在Go基础库中包含。"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head></head><body class="main-center theme-white" itemscope itemtype=http://schema.org/WebPage><header class=header itemscope itemtype=http://schema.org/WPHeader><div class=slimContent><div class=navbar-header><div class="profile-block text-center"><a id=avatar href=https://github.com/GanymedeNil target=_blank><img class="img-circle img-rotate" src=/avatar.png width=200 height=200></a><h2 id=name class="hidden-xs hidden-sm">Ganymede Nil</h2><h3 id=title class="hidden-xs hidden-sm hidden-md">Developer</h3><small id=location class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>BeiJing, China</small></div><div class=search id=search-form-wrap><form class="search-form sidebar-form"><div class=input-group><input type=text class="search-form-input form-control" placeholder=搜索>
+<span class=input-group-btn><button type=submit class="search-form-submit btn btn-flat" onclick=return!1><i class="icon icon-search"></i></button></span></div><div class=ins-search><div class=ins-search-mask></div><div class=ins-search-container><div class=ins-input-wrapper><input type=text class=ins-search-input placeholder=想要查找什么... x-webkit-speech>
+<button type=button class="close ins-close ins-selectable" data-dismiss=modal aria-label=Close><span aria-hidden=true>×</span></button></div><div class=ins-section-wrapper><div class=ins-section-container></div></div></div></div></form></div><button class="navbar-toggle collapsed" type=button data-toggle=collapse data-target=#main-navbar aria-controls=main-navbar aria-expanded=false>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span></button></div><nav id=main-navbar class="collapse navbar-collapse" itemscope itemtype=http://schema.org/SiteNavigationElement role=navigation><ul class="nav navbar-nav main-nav"><li class="menu-item menu-item-home"><a href=/><i class="icon icon-home-fill"></i>
+<span class=menu-title>首页</span></a></li><li class="menu-item menu-item-archives"><a href=/posts><i class="icon icon-archives-fill"></i>
+<span class=menu-title>归档</span></a></li><li class="menu-item menu-item-categories"><a href=/categories><i class="icon icon-folder"></i>
+<span class=menu-title>分类</span></a></li><li class="menu-item menu-item-tags"><a href=/tags><i class="icon icon-tags"></i>
+<span class=menu-title>标签</span></a></li><li class="menu-item menu-item-links"><a href=/links><i class="icon icon-friendship"></i>
+<span class=menu-title>友链</span></a></li><li class="menu-item menu-item-about"><a href=/about><i class="icon icon-cup-fill"></i>
+<span class=menu-title>关于</span></a></li></ul></nav></div></header><aside class=sidebar itemscope itemtype=http://schema.org/WPSideBar><div class=slimContent><div class=widget><h3 class=widget-title>公告</h3><div class=widget-body><div id=board><div class=content><p>欢迎交流与分享经验!~</p></div></div></div></div><div class=widget><h3 class=widget-title>分类</h3><div class=widget-body><ul class=category-list><li class=category-list-item><a href=/categories/AI/ class=category-list-link>AI</a><span class=category-list-count>6</span></li><li class=category-list-item><a href=/categories/Go/ class=category-list-link>Go</a><span class=category-list-count>2</span></li><li class=category-list-item><a href=/categories/Laravel/ class=category-list-link>Laravel</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/PHP/ class=category-list-link>PHP</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/go%E5%9F%BA%E7%A1%80%E5%BA%93/ class=category-list-link>go基础库</a><span class=category-list-count>52</span></li><li class=category-list-item><a href=/categories/php7/ class=category-list-link>php7</a><span class=category-list-count>5</span></li><li class=category-list-item><a href=/categories/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9C%8B%E7%9A%84NGINX/ class=category-list-link>写给大忙人看的NGINX</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9C%8B%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B9%A6%E7%B3%BB%E7%B1%BB/ class=category-list-link>写给大忙人看的技术书系类</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%89%8D%E7%AB%AF/ class=category-list-link>前端</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/ class=category-list-link>区块链</a><span class=category-list-count>3</span></li><li class=category-list-item><a href=/categories/%E5%BC%80%E5%8F%91/ class=category-list-link>开发</a><span class=category-list-count>17</span></li><li class=category-list-item><a href=/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/ class=category-list-link>微服务</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E6%9E%B6%E6%9E%84/ class=category-list-link>架构</a><span class=category-list-count>1</span></li></ul></div></div><div class=widget><h3 class=widget-title>标签</h3><div class=widget-body><ul class=tag-list><li class=tag-list-item><a href=/tags/Hardhat/ class=tag-list-link>Hardhat</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/JAX/ class=tag-list-link>JAX</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/LLM/ class=tag-list-link>LLM</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/NFT/ class=tag-list-link>NFT</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Php-Storm/ class=tag-list-link>Php-Storm</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Predis/ class=tag-list-link>Predis</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/SOL/ class=tag-list-link>SOL</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Solana/ class=tag-list-link>Solana</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Solidity/ class=tag-list-link>Solidity</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/ddd/ class=tag-list-link>ddd</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/docker/ class=tag-list-link>docker</a><span class=tag-list-count>4</span></li><li class=tag-list-item><a href=/tags/gemma/ class=tag-list-link>gemma</a><span class=tag-list-count>5</span></li><li class=tag-list-item><a href=/tags/go/ class=tag-list-link>go</a><span class=tag-list-count>57</span></li><li class=tag-list-item><a href=/tags/hexo/ class=tag-list-link>hexo</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/kerasNLP/ class=tag-list-link>kerasNLP</a><span class=tag-list-count>3</span></li><li class=tag-list-item><a href=/tags/laravel/ class=tag-list-link>laravel</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/linux/ class=tag-list-link>linux</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/nginx/ class=tag-list-link>nginx</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/nuxt/ class=tag-list-link>nuxt</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/php/ class=tag-list-link>php</a><span class=tag-list-count>5</span></li><li class=tag-list-item><a href=/tags/redis/ class=tag-list-link>redis</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/rust/ class=tag-list-link>rust</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/swoole/ class=tag-list-link>swoole</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/web3/ class=tag-list-link>web3</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/xdebug/ class=tag-list-link>xdebug</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E4%BB%A5%E5%A4%AA%E5%9D%8A/ class=tag-list-link>以太坊</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E6%80%BB%E7%BB%93/ class=tag-list-link>总结</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/ class=tag-list-link>智能合约</a><span class=tag-list-count>1</span></li></ul></div></div><div class=widget><h3 class=widget-title>最新文章</h3><div class=widget-body><ul class="recent-post-list list-unstyled no-thumbnail"><li><div class=item-inner><p class=item-title><a href=/2025/01/23/solana-tutorial-1.html class=title>Solana 链开发实战（一）</a></p><p class=item-date><time datetime="2025-01-23 18:08:23 +0000 UTC" itemprop=datePublished>2025-01-23</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/04/20/Gemma-JAX-inference.html class=title>Gemma JAX 推理</a></p><p class=item-date><time datetime="2024-04-20 23:10:39 +0000 UTC" itemprop=datePublished>2024-04-20</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html class=title>在使用 Keras 进行 Gemma 模型的分布式微调和推理</a></p><p class=item-date><time datetime="2024-03-30 22:32:29 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html class=title>在 Keras 中使用 LoRA 微调 Gemma 模型</a></p><p class=item-date><time datetime="2024-03-30 21:42:12 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Get-started-with-Gemma-using-KerasNLP.html class=title>使用 KerasNLP 快速开始 Gemma</a></p><p class=item-date><time datetime="2024-03-30 19:20:02 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li></ul></div></div></div></aside><aside class="sidebar sidebar-toc collapse" id=collapseToc itemscope itemtype=http://schema.org/WPSideBar><div class=slimContent><h4 class=toc-title>文章目录</h4><nav id=toc class="js-toc toc"></nav></div></aside><main class=main role=main><div class=content><article id=- class="article article-type-" itemscope itemtype=http://schema.org/BlogPosting><div class=article-header><h1 itemprop=name><a class=article-title href=/2022/12/21/go-standard-library-by-slog-early.html>Go slog 日志包尝鲜</a></h1><div class=article-meta><span class=article-date><i class="icon icon-calendar-check"></i>&nbsp;
+<a href=/2022/12/21/go-standard-library-by-slog-early.html class=article-date><time datetime="2022-12-21 11:06:00 +0000 UTC" itemprop=datePublished>2022-12-21</time></a></span>
+<span class=article-category><i class="icon icon-folder"></i>&nbsp;
+<a class=article-category-link href=/categories/go%E5%9F%BA%E7%A1%80%E5%BA%93/>go基础库</a></span>
+<span class=article-tag><i class="icon icon-tags"></i>&nbsp;
+<a class=article-tag-link href=/tags/go/>go</a></span>
+<span class=post-comment><i class="icon icon-comment"></i>&nbsp;<a href=/2022/12/21/go-standard-library-by-slog-early.html#comments class=article-comment-link>评论</a></span>
+<span class="post-wordcount hidden-xs" itemprop=wordCount>字数统计: 1234字</span>
+<span class="post-readcount hidden-xs" itemprop=timeRequired>阅读时长: 3分</span></div></div><div class="article-entry marked-body js-toc-content" itemprop=articleBody><p><strong>slog</strong> 是 Go 团队开发的一个实验性日志包，它提供了结构化日志记录的功能。
+<strong>注意：当前该包还未在Go基础库中包含。</strong></p><h1 id=安装>安装</h1><p>创建新的 Go 项目或者使用现有的项目通过以下命令进行安装。</p><pre><code class=language-go>go get golang.org/x/exp/slog
+</code></pre><h1 id=使用>使用</h1><pre><code class=language-go>package main
+import &quot;golang.org/x/exp/slog&quot;
+
+func main() {
+	slog.Info(&quot;Go is best language!&quot;)
+}
+</code></pre><p>输出：</p><pre><code class=language-bash>$ go run main.go
+2022/12/21 11:16:00 INFO Go is best language!
+</code></pre><p>默认情况下，输出包括时间、日志级别和消息。</p><p>以下是可用的日志级别。</p><pre><code>Debug 
+Info 
+Warn 
+Error
+</code></pre><h1 id=结构化日志记录>结构化日志记录</h1><p><strong>slog</strong> 是一个结构化日志记录工具，支持两种记录格式：text 和 json。</p><h2 id=text-handler>Text Handler</h2><p>首先创建一个 text handler 和 一个 new logger。</p><pre><code class=language-go>package main  
+  
+import (  
+   &quot;os&quot;  
+  
+   &quot;golang.org/x/exp/slog&quot;)  
+  
+func main() {  
+   textHandler := slog.NewTextHandler(os.Stdout)  
+   logger := slog.New(textHandler)  
+  
+   logger.Info(&quot;Go is the best language!&quot;)  
+}
+</code></pre><p>输出：</p><pre><code class=language-bash>$ go run main.go
+time=2022-12-21T11:20:52.919+08:00 level=INFO msg=&quot;Go is the best language!&quot;
+</code></pre><p>我们可以看出日志是以键值对的形式输出。这通常称为 <a href=https://brandur.org/logfmt>logfmt</a> 格式。</p><p>许多日志分析工具都可以处理<strong>logfmt</strong>格式的日志。<code>Logfmt</code> 也是人类可读的一种日志格式。</p><h2 id=json-handler>JSON Handler</h2><p>你还可以输出 JSON 格式的日志。</p><pre><code class=language-go>package main  
+  
+import (  
+   &quot;os&quot;  
+  
+   &quot;golang.org/x/exp/slog&quot;)  
+  
+func main() {  
+   jsonHandler := slog.NewJSONHandler(os.Stdout) // 👈  
+   logger := slog.New(jsonHandler)  
+  
+   logger.Info(&quot;Go is the best language!&quot;)  
+}
+</code></pre><p>输出：</p><pre><code class=language-bash>$ go run main.go
+{&quot;time&quot;:&quot;2022-12-21T11:26:08.355317+08:00&quot;,&quot;level&quot;:&quot;INFO&quot;,&quot;msg&quot;:&quot;Go is the best language!&quot;}
+</code></pre><p>每个日志都记录为一个 json 对象，其中包含属性。</p><h1 id=属性>属性</h1><p><strong>slog</strong> 是一个结构化的记录器，提供了指定属性的能力。</p><pre><code class=language-go>package main  
+  
+import (  
+   &quot;os&quot;  
+  
+   &quot;golang.org/x/exp/slog&quot;)  
+  
+func main() {  
+   textHandler := slog.NewTextHandler(os.Stdout)  
+   logger := slog.New(textHandler)  
+  
+   logger.Info(&quot;Usage Statistics&quot;, slog.Int(&quot;current-memory&quot;, 50))  
+}
+</code></pre><p>输出：</p><pre><code class=language-bash>$ go run main.go
+time=2022-12-21T11:28:27.209+08:00 level=INFO msg=&quot;Usage Statistics&quot; current-memory=50
+</code></pre><p>在上面的示例中，使用 <code>.</code> 添加了一个整数属性<code>slog.Int</code>。</p><p>以下是各类支持的属性：</p><pre><code>String 
+Int64 
+Int 
+Uint64 
+Float64 
+Bool 
+Time 
+Duration
+</code></pre><p>你可以根据需要添加任意数量的属性。</p><pre><code class=language-go>package main  
+  
+import (  
+   &quot;os&quot;  
+  
+   &quot;golang.org/x/exp/slog&quot;)  
+  
+func main() {  
+   textHandler := slog.NewTextHandler(os.Stdout)  
+   logger := slog.New(textHandler)  
+  
+   logger.Info(&quot;Usage Statistics&quot;,  
+      slog.Int(&quot;current-memory&quot;, 50),  
+      slog.Int(&quot;min-memory&quot;, 20),  
+      slog.Int(&quot;max-memory&quot;, 80),  
+      slog.Int(&quot;cpu&quot;, 10),  
+      slog.String(&quot;app-version&quot;, &quot;v0.0.1-beta&quot;),  
+   )  
+}
+</code></pre><p>输出：</p><pre><code class=language-bash>$ go run main.go
+time=2022-12-21T11:31:12.469+08:00 level=INFO msg=&quot;Usage Statistics&quot; current-memory=50 min-memory=20 max-memory=80 cpu=10 app-version=v0.0.1-beta
+</code></pre><h1 id=分组属性>分组属性</h1><p>你可以将属性分组在一个键下。例如，所有内存属性都可以分组在 <code>memory</code> 键下。</p><pre><code class=language-go>package main  
+  
+import (  
+   &quot;os&quot;  
+  
+   &quot;golang.org/x/exp/slog&quot;)  
+  
+func main() {  
+   textHandler := slog.NewTextHandler(os.Stdout)  
+   logger := slog.New(textHandler)  
+  
+   logger.Info(&quot;Usage Statistics&quot;,  
+      slog.Group(&quot;memory&quot;,  
+         slog.Int(&quot;current&quot;, 50),  
+         slog.Int(&quot;min&quot;, 20),  
+         slog.Int(&quot;max&quot;, 80)),  
+      slog.Int(&quot;cpu&quot;, 10),  
+      slog.String(&quot;app-version&quot;, &quot;v0.0.1-beta&quot;),  
+   )  
+}
+</code></pre><p>输出：</p><pre><code class=language-bash>$ go run main.go
+time=2022-12-21T11:33:38.016+08:00 level=INFO msg=&quot;Usage Statistics&quot; memory.current=50 memory.min=20 memory.max=80 cpu=10 app-version=v0.0.1-beta
+</code></pre><p>使用 <code>JsonHandler</code> 输出将如下所示。</p><pre><code class=language-bash>$ go run main.go | jq
+{
+  &quot;time&quot;: &quot;2022-12-21T11:35:24.648829+08:00&quot;,
+  &quot;level&quot;: &quot;INFO&quot;,
+  &quot;msg&quot;: &quot;Usage Statistics&quot;,
+  &quot;memory&quot;: {
+    &quot;current&quot;: 50,
+    &quot;min&quot;: 20,
+    &quot;max&quot;: 80
+  },
+  &quot;cpu&quot;: 10,
+  &quot;app-version&quot;: &quot;v0.0.1-beta&quot;
+}
+</code></pre><h1 id=公共属性>公共属性</h1><p>假设你希望拥有一个应包含在所有正在生成的日志中的属性，此类属性的示例包括<strong>服务名称</strong>、<strong>应用程序版本</strong>。</p><pre><code class=language-go>package main  
+  
+import (  
+   &quot;os&quot;  
+  
+   &quot;golang.org/x/exp/slog&quot;)  
+  
+func main() {  
+   textHandler := slog.NewTextHandler(os.Stdout).  
+      WithAttrs([]slog.Attr{slog.String(&quot;app-version&quot;, &quot;v0.0.1-beta&quot;)}) // 👈 为所有日志添加属性   
+   logger := slog.New(textHandler)  
+  
+   logger.Info(&quot;Generating statistics&quot;)  
+   logger.Info(&quot;Usage Statistics&quot;,  
+      slog.Group(&quot;memory&quot;,  
+         slog.Int(&quot;current&quot;, 50),  
+         slog.Int(&quot;min&quot;, 20),  
+         slog.Int(&quot;max&quot;, 80)),  
+      slog.Int(&quot;cpu&quot;, 10),  
+   )  
+}
+</code></pre><p>输出：</p><pre><code class=language-bash>$ go run main.go
+time=2022-12-21T11:37:26.363+08:00 level=INFO msg=&quot;Generating statistics&quot; app-version=v0.0.1-beta
+time=2022-12-21T11:37:26.363+08:00 level=INFO msg=&quot;Usage Statistics&quot; app-version=v0.0.1-beta memory.current=50 memory.min=20 memory.max=80 cpu=10
+</code></pre><p>你可以看到 <code>app-version</code>  两个日志中都包含该属性。在处理程序上使用函数指定的属性<a href=https://pkg.go.dev/golang.org/x/exp/slog#JSONHandler.WithAttrs><code>WithAttrs</code></a>将包含在所有日志中。</p><h1 id=在-context-中传递-logger>在 context 中传递 logger</h1><p>理想情况下，你希望创建一个具有特定配置和属性的记录器，并在整个应用程序中使用它。</p><p><strong>slog</strong>具有内置函数，可让让你在<code>context</code>中使用。</p><pre><code class=language-go>package main  
+  
+import (  
+   &quot;context&quot;  
+   &quot;os&quot;  
+   &quot;golang.org/x/exp/slog&quot;)  
+  
+func main() {  
+   textHandler := slog.NewTextHandler(os.Stdout).  
+      WithAttrs([]slog.Attr{slog.String(&quot;app-version&quot;, &quot;v0.0.1-beta&quot;)})  
+   logger := slog.New(textHandler)  
+  
+   ctx := slog.NewContext(context.Background(), logger) // 👈 context containing logger   sendUsageStatus(ctx)  
+}  
+  
+func sendUsageStatus(ctx context.Context) {  
+   logger := slog.FromContext(ctx) // 👈 grab logger from context  
+   logger.Info(&quot;Generating statistics&quot;)  
+  
+   logger.Info(&quot;Usage Statistics&quot;,  
+      slog.Group(&quot;memory&quot;,  
+         slog.Int(&quot;current&quot;, 50),  
+         slog.Int(&quot;min&quot;, 20),  
+         slog.Int(&quot;max&quot;, 80)),  
+      slog.Int(&quot;cpu&quot;, 10),  
+   )  
+}
+</code></pre><p>输出：</p><pre><code class=language-bash>$ go run main.go
+time=2022-12-21T11:41:28.333+08:00 level=INFO msg=&quot;Generating statistics&quot; app-version=v0.0.1-beta
+time=2022-12-21T11:41:28.334+08:00 level=INFO msg=&quot;Usage Statistics&quot; app-version=v0.0.1-beta memory.current=50 memory.min=20 memory.max=80 cpu=10
+</code></pre><p><a href=https://pkg.go.dev/golang.org/x/exp/slog#NewContext><code>NewContext</code></a>创建一个包含 logger 的 新的 context。</p><p><a href=https://pkg.go.dev/golang.org/x/exp/slog#FromContext><code>FromContext</code></a>从 contex t中获取 logger。如果 context 不包含 logger，它会返回<a href=https://pkg.go.dev/golang.org/x/exp/slog#Default>default logger</a>。</p><h1 id=日志级别>日志级别</h1><p>如果你使用的是默认 logger，它不会记录调试日志，因为默认日志级别为<code>Info</code>.</p><p>你可以创建一个新的 logger，并将默认日志级别设置为<code>Debug</code>以显示调试日志。</p><pre><code class=language-go>package main  
+  
+import (  
+   &quot;os&quot;  
+  
+   &quot;golang.org/x/exp/slog&quot;)  
+  
+func main() {  
+   opts := slog.HandlerOptions{  
+      Level: slog.LevelDebug,  
+   }  
+  
+   textHandler := opts.NewTextHandler(os.Stdout)  
+   logger := slog.New(textHandler)  
+  
+   logger.Debug(&quot;Debug&quot;)  
+   logger.Info(&quot;Info&quot;)  
+   logger.Warn(&quot;Warn&quot;)  
+}
+</code></pre><p>输出：</p><pre><code class=language-bash>$ go run main.go
+time=2022-12-21T11:45:23.466+08:00 level=DEBUG msg=Debug
+time=2022-12-21T11:45:23.466+08:00 level=INFO msg=Info
+time=2022-12-21T11:45:23.466+08:00 level=WARN msg=Warn
+</code></pre><h1 id=本文来源>本文来源</h1><p>Logging in Go with slog - <a href=https://thedevelopercafe.com/articles/logging-in-go-with-slog-a7bb489755c2>https://thedevelopercafe.com/articles/logging-in-go-with-slog-a7bb489755c2</a></p><p>本文作者的其他 Go 语言文章也非常值得一读。</p></div><div class=article-footer><blockquote class=mt-2x><ul class="post-copyright list-unstyled"><li class="post-copyright-link hidden-xs"><strong>本文链接:</strong>
+<a href=https://www.ganymedenil.com/2022/12/21/go-standard-library-by-slog-early.html title="Go slog 日志包尝鲜" target=_blank rel=external>https://www.ganymedenil.com/2022/12/21/go-standard-library-by-slog-early.html</a></li><li class=post-copyright-license><strong>版权声明：</strong><a href=http://creativecommons.org/licenses/by/4.0/deed.zh target=_blank rel=external>本博客所有文章除特别声明外，均采用 CC BY 4.0 CN协议 许可协议。转载请注明出处</a></li></ul></blockquote><div class="panel panel-default panel-badger"><div class=panel-body><figure class=media><div class=media-left><a href=https://github.com/GanymedeNil target=_blank class="img-burn thumb-sm visible-lg"><img src=/avatar.png class="img-rounded w-full" alt></a></div><div class=media-body><h3 class=media-heading><a href=https://github.com/GanymedeNil target=_blank><span class=text-dark>Ganymede Nil</span><small class=ml-1x>Developer</small></a></h3><div>喜欢新事物，关注后端动态，对新的技术有追求； 喜欢 coding。</div></div></figure></div></div></div></article><section id=comments><div id=vcomments></div></section></div><nav class="bar bar-footer clearfix" data-stick-bottom><div class=bar-inner><ul class="pager pull-left"><li class=prev><a href=/2022/07/04/support-for-first-trigger-go-ticker.html title="支持首次触发的 Go Ticker"><i class="icon icon-angle-left" aria-hidden=true></i><span>&nbsp;&nbsp;下一篇</span></a></li><li class=next><a href=/2023/01/04/a-quick-guide-to-the-go-programming-language-for-busy-coders.html title=写给大忙人看的Go语言快速指南（中文翻译）><span>上一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden=true></i></a></li><li class=toggle-toc><a class="toggle-btn collapsed" data-toggle=collapse href=#collapseToc aria-expanded=false title=文章目录 role=button><span>[&nbsp;</span><span>文章目录</span>
+<i class="text-collapsed icon icon-anchor"></i>
+<i class="text-in icon icon-close"></i>
+<span>]</span></a></li></ul><button type=button class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle=modal data-target=#donateModal><span>赏</span></button><div class=bar-right><div class=share-component data-sites=weibo,qq,wechat,facebook,twitter data-mobile-sites=weibo,qq,qzone></div></div></div></nav><div class="modal modal-center modal-small modal-xs-full fade" id=donateModal tabindex=-1 role=dialog><div class=modal-dialog role=document><div class="modal-content donate"><button type=button class=close data-dismiss=modal aria-label=Close><span aria-hidden=true>&#215;</span></button><div class=modal-body><div class=donate-box><div class=donate-head><p>感谢您的支持,我会继续努力的!</p></div><div class=tab-content><div role=tabpanel class="tab-pane fade active in" id=alipay><div class=donate-payimg><img src=/donate/alipay.jpg alt=扫码支持 title=扫一扫></div><p class="text-muted mv">扫码打赏, 多少你说了算~</p><p class=text-grey>打开支付宝扫一扫，即可进行扫码打赏哦~</p></div><div role=tabpanel class="tab-pane fade" id=wechatpay><div class=donate-payimg><img src=/donate/weipay.jpg alt=扫码支持 title=扫一扫></div><p class="text-muted mv">扫码打赏, 多少你说了算~</p><p class=text-grey>打开微信扫一扫，即可进行扫码打赏哦</p></div></div><div class=donate-footer><ul class="nav nav-tabs nav-justified" role=tablist><li role=presentation class=active><a href=#alipay id=alipay-tab role=tab data-toggle=tab aria-controls=alipay aria-expanded=true><i class="icon icon-alipay"></i> 支付宝</a></li><li role=presentation><a href=#wechatpay role=tab id=wechatpay-tab data-toggle=tab aria-controls=wechatpay aria-expanded=false><i class="icon icon-wepay"></i>
+微信支付</a></li></ul></div></div></div></div></div></div></main><footer class=footer itemscope itemtype=http://schema.org/WPFooter><ul class=social-links><li><a href=https://github.com/GanymedeNil target=_blank title=github data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li><li><a href=/index.xml target=_blank title=rss data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li><li><a href=http://weibo.com/jinhongyang target=_blank title=weibo data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li></ul><div class=copyright>&copy;2017 -
+2025<div class=publishby>Theme by <a href=https://github.com/cofess target=_blank>cofess </a>base on<a href=https://github.com/cofess/hexo-theme-pure target=_blank> pure</a>.</div><div>powered by <a href=https://gohugo.io/ target=_blank>hugo</a></div></div></footer><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_SVG"></script>
+<script type=text/x-mathjax-config>
+    MathJax.Hub.Config({
+            showMathMenu: false, //disables context menu
+            tex2jax: {
+            inlineMath: [ ['$','$'], ['\\(','\\)'] ]
+           }
+    });
+</script><script src=https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js></script>
+<script>window.jQuery||document.write('<script src="js/jquery.min.js"><\/script>')</script><script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/php.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/bash.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/cmake.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/dockerfile.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/json.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/lua.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/makefile.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/nginx.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/rust.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/shell.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/yaml.min.js defer></script><script>hljs.configure({tabReplace:"    ",classPrefix:""}),hljs.initHighlightingOnLoad()</script>
+<script src=/js/application.min.7ef841188add421ff966768c2e5f1a1551076353a65f0d39fbaf504b456936f8.js></script>
+<script src=/js/plugin.min.738a460bf4317fac61717f1bca393e53d00973db9754d9f0a81c7312d5874840.js></script>
+<script>(function(e){var t={TRANSLATION:{POSTS:"文章",PAGES:"页面",CATEGORIES:"分类",TAGS:"标签",UNTITLED:"(未命名)"},ROOT_URL:"https://www.ganymedenil.com",CONTENT_URL:"https://www.ganymedenil.com/searchindex.json "};e.INSIGHT_CONFIG=t})(window)</script><script type=text/javascript src=/js/insight.min.716b0c6a00b68ccc31a2b65345f3412f4246ffa94a90f8e25d525528b4504f9937880692bbe619023233caba5d0a17ebe23d7cfb57cd3a88f23ea337ad5e4d00.js defer></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js></script>
+<script>tocbot.init({tocSelector:".js-toc",contentSelector:".js-toc-content",headingSelector:"h1, h2, h3",hasInnerContainers:!0})</script><script src=https://cdn1.lncld.net/static/js/3.0.4/av-min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/valine></script>
+<script type=text/javascript>var GUEST=["nick","mail","link"],meta="nick,mail",meta=meta.split(",").filter(function(e){return GUEST.indexOf(e)>-1});new Valine({el:"#vcomments",verify:null,notify:null,appId:"lI57bh1xqblhjL3OUrOcnX2R-gzGzoHsz",appKey:"2aCHvIxz6nKXqP0sBq42gBhC",placeholder:"enjoy~",avatar:"mm",meta,pageSize:"10"||10,visitor:!1})</script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-140810980-1"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","UA-140810980-1")</script></body></html>

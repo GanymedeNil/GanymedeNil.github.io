@@ -1,0 +1,276 @@
+<!doctype html><html lang=zh><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>Solana 链开发实战（一） - ZA TAN</title><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui"><meta name=renderer content="webkit"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="black"><meta name=format-detection content="telephone=no,email=no,adress=no"><meta name=theme-color content="#000000"><meta http-equiv=window-target content="_top"><meta name=description content="随着川普币（OFFICIAL TRUMP）的走红，SOL（SOLANA） 也重新回到大众视野。借此机会我将写一个关于SOL开发的专题教程以供参考，帮助大家理解 SOL 上的智能合约开发与代币铸造。
+本节我将从对称和不对称加密算法开始讲起，然后由浅入深到最后的如何使用自定义链上程序。
+"><meta name=generator content="Hugo 0.110.0 with theme pure"><title>Solana 链开发实战（一） - ZA TAN</title><link rel=icon href=/favicon.png type=image/x-icon><link rel=stylesheet href=/css/style.min.c58e22f1aa6179cd5cb60b9e08421a2b9a9c9fe9352d095e051b51aae209e5c0.css><link rel=stylesheet href=https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css async><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css async><meta property="og:title" content="Solana 链开发实战（一）"><meta property="og:description" content="随着川普币（OFFICIAL TRUMP）的走红，SOL（SOLANA） 也重新回到大众视野。借此机会我将写一个关于SOL开发的专题教程以供参考，帮助大家理解 SOL 上的智能合约开发与代币铸造。
+本节我将从对称和不对称加密算法开始讲起，然后由浅入深到最后的如何使用自定义链上程序。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.ganymedenil.com/2025/01/23/solana-tutorial-1.html"><meta property="article:section" content="posts"><meta property="article:published_time" content="2025-01-23T18:08:23+00:00"><meta property="article:modified_time" content="2025-01-23T18:08:23+00:00"><meta itemprop=name content="Solana 链开发实战（一）"><meta itemprop=description content="随着川普币（OFFICIAL TRUMP）的走红，SOL（SOLANA） 也重新回到大众视野。借此机会我将写一个关于SOL开发的专题教程以供参考，帮助大家理解 SOL 上的智能合约开发与代币铸造。
+本节我将从对称和不对称加密算法开始讲起，然后由浅入深到最后的如何使用自定义链上程序。"><meta itemprop=datePublished content="2025-01-23T18:08:23+00:00"><meta itemprop=dateModified content="2025-01-23T18:08:23+00:00"><meta itemprop=wordCount content="5311"><meta itemprop=keywords content="SOL,Solana,web3,"><meta name=twitter:card content="summary"><meta name=twitter:title content="Solana 链开发实战（一）"><meta name=twitter:description content="随着川普币（OFFICIAL TRUMP）的走红，SOL（SOLANA） 也重新回到大众视野。借此机会我将写一个关于SOL开发的专题教程以供参考，帮助大家理解 SOL 上的智能合约开发与代币铸造。
+本节我将从对称和不对称加密算法开始讲起，然后由浅入深到最后的如何使用自定义链上程序。"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head></head><body class="main-center theme-white" itemscope itemtype=http://schema.org/WebPage><header class=header itemscope itemtype=http://schema.org/WPHeader><div class=slimContent><div class=navbar-header><div class="profile-block text-center"><a id=avatar href=https://github.com/GanymedeNil target=_blank><img class="img-circle img-rotate" src=/avatar.png width=200 height=200></a><h2 id=name class="hidden-xs hidden-sm">Ganymede Nil</h2><h3 id=title class="hidden-xs hidden-sm hidden-md">Developer</h3><small id=location class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>BeiJing, China</small></div><div class=search id=search-form-wrap><form class="search-form sidebar-form"><div class=input-group><input type=text class="search-form-input form-control" placeholder=搜索>
+<span class=input-group-btn><button type=submit class="search-form-submit btn btn-flat" onclick=return!1><i class="icon icon-search"></i></button></span></div><div class=ins-search><div class=ins-search-mask></div><div class=ins-search-container><div class=ins-input-wrapper><input type=text class=ins-search-input placeholder=想要查找什么... x-webkit-speech>
+<button type=button class="close ins-close ins-selectable" data-dismiss=modal aria-label=Close><span aria-hidden=true>×</span></button></div><div class=ins-section-wrapper><div class=ins-section-container></div></div></div></div></form></div><button class="navbar-toggle collapsed" type=button data-toggle=collapse data-target=#main-navbar aria-controls=main-navbar aria-expanded=false>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span></button></div><nav id=main-navbar class="collapse navbar-collapse" itemscope itemtype=http://schema.org/SiteNavigationElement role=navigation><ul class="nav navbar-nav main-nav"><li class="menu-item menu-item-home"><a href=/><i class="icon icon-home-fill"></i>
+<span class=menu-title>首页</span></a></li><li class="menu-item menu-item-archives"><a href=/posts><i class="icon icon-archives-fill"></i>
+<span class=menu-title>归档</span></a></li><li class="menu-item menu-item-categories"><a href=/categories><i class="icon icon-folder"></i>
+<span class=menu-title>分类</span></a></li><li class="menu-item menu-item-tags"><a href=/tags><i class="icon icon-tags"></i>
+<span class=menu-title>标签</span></a></li><li class="menu-item menu-item-links"><a href=/links><i class="icon icon-friendship"></i>
+<span class=menu-title>友链</span></a></li><li class="menu-item menu-item-about"><a href=/about><i class="icon icon-cup-fill"></i>
+<span class=menu-title>关于</span></a></li></ul></nav></div></header><aside class=sidebar itemscope itemtype=http://schema.org/WPSideBar><div class=slimContent><div class=widget><h3 class=widget-title>公告</h3><div class=widget-body><div id=board><div class=content><p>欢迎交流与分享经验!~</p></div></div></div></div><div class=widget><h3 class=widget-title>分类</h3><div class=widget-body><ul class=category-list><li class=category-list-item><a href=/categories/AI/ class=category-list-link>AI</a><span class=category-list-count>6</span></li><li class=category-list-item><a href=/categories/Go/ class=category-list-link>Go</a><span class=category-list-count>2</span></li><li class=category-list-item><a href=/categories/Laravel/ class=category-list-link>Laravel</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/PHP/ class=category-list-link>PHP</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/go%E5%9F%BA%E7%A1%80%E5%BA%93/ class=category-list-link>go基础库</a><span class=category-list-count>52</span></li><li class=category-list-item><a href=/categories/php7/ class=category-list-link>php7</a><span class=category-list-count>5</span></li><li class=category-list-item><a href=/categories/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9C%8B%E7%9A%84NGINX/ class=category-list-link>写给大忙人看的NGINX</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9C%8B%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B9%A6%E7%B3%BB%E7%B1%BB/ class=category-list-link>写给大忙人看的技术书系类</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%89%8D%E7%AB%AF/ class=category-list-link>前端</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/ class=category-list-link>区块链</a><span class=category-list-count>3</span></li><li class=category-list-item><a href=/categories/%E5%BC%80%E5%8F%91/ class=category-list-link>开发</a><span class=category-list-count>17</span></li><li class=category-list-item><a href=/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/ class=category-list-link>微服务</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E6%9E%B6%E6%9E%84/ class=category-list-link>架构</a><span class=category-list-count>1</span></li></ul></div></div><div class=widget><h3 class=widget-title>标签</h3><div class=widget-body><ul class=tag-list><li class=tag-list-item><a href=/tags/Hardhat/ class=tag-list-link>Hardhat</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/JAX/ class=tag-list-link>JAX</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/LLM/ class=tag-list-link>LLM</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/NFT/ class=tag-list-link>NFT</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Php-Storm/ class=tag-list-link>Php-Storm</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Predis/ class=tag-list-link>Predis</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/SOL/ class=tag-list-link>SOL</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Solana/ class=tag-list-link>Solana</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Solidity/ class=tag-list-link>Solidity</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/ddd/ class=tag-list-link>ddd</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/docker/ class=tag-list-link>docker</a><span class=tag-list-count>4</span></li><li class=tag-list-item><a href=/tags/gemma/ class=tag-list-link>gemma</a><span class=tag-list-count>5</span></li><li class=tag-list-item><a href=/tags/go/ class=tag-list-link>go</a><span class=tag-list-count>57</span></li><li class=tag-list-item><a href=/tags/hexo/ class=tag-list-link>hexo</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/kerasNLP/ class=tag-list-link>kerasNLP</a><span class=tag-list-count>3</span></li><li class=tag-list-item><a href=/tags/laravel/ class=tag-list-link>laravel</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/linux/ class=tag-list-link>linux</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/nginx/ class=tag-list-link>nginx</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/nuxt/ class=tag-list-link>nuxt</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/php/ class=tag-list-link>php</a><span class=tag-list-count>5</span></li><li class=tag-list-item><a href=/tags/redis/ class=tag-list-link>redis</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/rust/ class=tag-list-link>rust</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/swoole/ class=tag-list-link>swoole</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/web3/ class=tag-list-link>web3</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/xdebug/ class=tag-list-link>xdebug</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E4%BB%A5%E5%A4%AA%E5%9D%8A/ class=tag-list-link>以太坊</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E6%80%BB%E7%BB%93/ class=tag-list-link>总结</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/ class=tag-list-link>智能合约</a><span class=tag-list-count>1</span></li></ul></div></div><div class=widget><h3 class=widget-title>最新文章</h3><div class=widget-body><ul class="recent-post-list list-unstyled no-thumbnail"><li><div class=item-inner><p class=item-title><a href=/2025/01/23/solana-tutorial-1.html class=title>Solana 链开发实战（一）</a></p><p class=item-date><time datetime="2025-01-23 18:08:23 +0000 UTC" itemprop=datePublished>2025-01-23</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/04/20/Gemma-JAX-inference.html class=title>Gemma JAX 推理</a></p><p class=item-date><time datetime="2024-04-20 23:10:39 +0000 UTC" itemprop=datePublished>2024-04-20</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html class=title>在使用 Keras 进行 Gemma 模型的分布式微调和推理</a></p><p class=item-date><time datetime="2024-03-30 22:32:29 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html class=title>在 Keras 中使用 LoRA 微调 Gemma 模型</a></p><p class=item-date><time datetime="2024-03-30 21:42:12 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Get-started-with-Gemma-using-KerasNLP.html class=title>使用 KerasNLP 快速开始 Gemma</a></p><p class=item-date><time datetime="2024-03-30 19:20:02 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li></ul></div></div></div></aside><aside class="sidebar sidebar-toc collapse" id=collapseToc itemscope itemtype=http://schema.org/WPSideBar><div class=slimContent><h4 class=toc-title>文章目录</h4><nav id=toc class="js-toc toc"></nav></div></aside><main class=main role=main><div class=content><article id=- class="article article-type-" itemscope itemtype=http://schema.org/BlogPosting><div class=article-header><h1 itemprop=name><a class=article-title href=/2025/01/23/solana-tutorial-1.html>Solana 链开发实战（一）</a></h1><div class=article-meta><span class=article-date><i class="icon icon-calendar-check"></i>&nbsp;
+<a href=/2025/01/23/solana-tutorial-1.html class=article-date><time datetime="2025-01-23 18:08:23 +0000 UTC" itemprop=datePublished>2025-01-23</time></a></span>
+<span class=article-category><i class="icon icon-folder"></i>&nbsp;
+<a class=article-category-link href=/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/>区块链</a></span>
+<span class=article-tag><i class="icon icon-tags"></i>&nbsp;
+<a class=article-tag-link href=/tags/SOL/>SOL</a>
+<a class=article-tag-link href=/tags/Solana/>Solana</a>
+<a class=article-tag-link href=/tags/web3/>web3</a></span>
+<span class=post-comment><i class="icon icon-comment"></i>&nbsp;<a href=/2025/01/23/solana-tutorial-1.html#comments class=article-comment-link>评论</a></span>
+<span class="post-wordcount hidden-xs" itemprop=wordCount>字数统计: 5311字</span>
+<span class="post-readcount hidden-xs" itemprop=timeRequired>阅读时长: 11分</span></div></div><div class="article-entry marked-body js-toc-content" itemprop=articleBody><p>随着川普币（<a href=https://solscan.io/token/6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN>OFFICIAL TRUMP</a>）的走红，SOL（<a href=https://solana.com/zh>SOLANA</a>） 也重新回到大众视野。借此机会我将写一个关于SOL开发的专题教程以供参考，帮助大家理解 SOL 上的智能合约开发与代币铸造。</p><p>本节我将从对称和不对称加密算法开始讲起，然后由浅入深到最后的如何使用自定义链上程序。</p><h1 id=警告>警告</h1><p>因本教程涉及资产交易，为了避免您的资金损失，该教程全程将在 DevNet上进行操作，如您需要在 MaiNet 上操作请务必谨慎。</p><h1 id=对称和非对称加密>对称和非对称加密</h1><p>“加密”指隐藏信息的研究。日常生活中你会遇到两种主要的加密类型：</p><p><strong>对称加密</strong>是指使用相同的密钥进行加密和解密。它已有数百年的历史，从古埃及人到伊丽莎白女王一世都在使用。</p><p>对称加密算法有很多种，但今天最常见的是 AES 和 Chacha20。</p><h2 id=非对称加密><strong>非对称加密</strong></h2><p>非对称加密，也称为“公钥加密”，诞生于 20 世纪 70 年代。在非对称加密中，参与者拥有一对密钥（或密钥对）。每个密钥对由一个私钥和一个公钥组成。非对称加密的工作方式与对称加密不同，并且可以完成不同的任务：</p><p>**加密：**如果使用公钥加密，则只有来自同一密钥对的私钥才能用于读取它。</p><p>**签名：**如果使用私钥加密，则可以使用来自同一密钥对的公钥来证明私钥持有者对其进行了签名。</p><p>你甚至可以使用非对称加密来协商出一个用于对称加密的良好密钥！这称为密钥交换，你使用你的公钥和接收方的公钥来生成一个“会话”密钥。</p><p>非对称加密算法有很多种，但今天最常见的是 ECC 或 RSA 的变体。</p><p>非对称加密非常流行：</p><p>你的银行卡内部有一个私钥，用于对交易进行签名。</p><p>你的银行可以通过使用匹配的公钥检查交易来确认是你进行的交易。</p><p>网站在其证书中包含一个公钥。你的浏览器将使用此公钥来加密它发送到网页的数据（如个人信息、登录详细信息和信用卡号）。</p><p>网站拥有匹配的私钥，以便网站可以读取数据。</p><p>你的电子护照由签发国进行签名，以确保护照不被伪造。</p><p>电子护照闸门可以使用签发国的公钥来确认这一点。</p><p>你手机上的消息应用程序使用密钥交换来生成会话密钥。</p><p>简而言之，加密无处不在。Solana 以及其他区块链只是加密的众多用途之一。</p><h1 id=solana-使用公钥作为地址>Solana 使用公钥作为地址</h1><p><img src=https://static.ganymedenil.com/2025/01/23/wallet-addresses.svg alt="Solana 钱包地址"></p><p>参与 Solana 网络的用户至少拥有一个密钥对。在 Solana 中：</p><ul><li><p><strong>公钥</strong>被用作“地址”，指向 Solana 网络上的一个账户。即使是友好的名称——例如 example.sol ——也指向像 dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8 这样的地址。</p></li><li><p><strong>私钥</strong>用于验证对该密钥对的权限。如果您拥有某个地址的私钥，则您控制该地址内的代币。因此，顾名思义，您应该始终将私钥保密。</p></li></ul><h2 id=生成密钥对>生成密钥对</h2><p>创建新目录，安装 TypeScript、Solana web3.js 和 esrun：</p><pre><code class=language-bash>mkdir generate-keypair
+cd generate-keypair
+npm init -y
+npm install typescript @solana/web3.js@1 esrun @solana-developers/helpers@2
+</code></pre><p>新建一个文件名为<code>generate-keypair.ts</code>的文件</p><pre><code class=language-typescript>import { Keypair } from &quot;@solana/web3.js&quot;;
+const keypair = Keypair.generate();
+console.log(`✅ Generated keypair!`);
+</code></pre><p>运行<code>npx esrun generate-keypair.ts</code>。你应该看到以下文本：</p><pre><code class=language-bash>✅ Generated keypair!
+</code></pre><p>每个<code>Keypair</code>都有一个<code>publicKey</code>和<code>secretKey</code>属性。更新文件：</p><pre><code class=language-typescript>import { Keypair } from &quot;@solana/web3.js&quot;;
+ 
+const keypair = Keypair.generate();
+ 
+console.log(`The public key is: `, keypair.publicKey.toBase58());
+console.log(`The secret key is: `, keypair.secretKey);
+console.log(`✅ Finished!`);
+</code></pre><p>运行<code>npx esrun generate-keypair.ts</code>。你应该看到以下文本：</p><pre><code class=language-bash>The public key is:  CpuER4CRpfkLmXAdk3LDbh7urNqWyLL2gzyxoycmEeZc
+The secret key is:  Uint8Array(64) [
+  (a long series of numbers)
+]
+✅ Finished!
+</code></pre><blockquote><p><strong>不要在源代码中包含私钥</strong></p><p>由于密钥对可以从私钥重新生成，我们通常只存储私钥，并从私钥恢复密钥对。</p><p>此外，由于私钥赋予了地址的控制权，我们不将私钥存储在源代码中。相反，我们：</p><ul><li>将私钥放入 <code>.env</code> 文件中</li><li>将 <code>.env</code> 添加到 <code>.gitignore</code> 中，这样 <code>.env</code> 文件就不会被提交。</li></ul></blockquote><h2 id=从--env-文件加载现有密钥对>从 <code>.env</code> 文件加载现有密钥对</h2><p>为了确保您的私钥的安全，我们建议使用文件<code>.env</code>注入私钥：</p><p>创建一个名为<code>.env</code>的新文件，其中包含您之前创建的私钥内容：</p><pre><code class=language-ini>SECRET_KEY=&quot;[(a series of numbers)]&quot;
+</code></pre><p>然后我们可以从环境变量中加载密钥对。更新<code>generate-keypair.ts</code>：</p><pre><code class=language-typescript>import &quot;dotenv/config&quot;;
+import { getKeypairFromEnvironment } from &quot;@solana-developers/helpers&quot;;
+ 
+const keypair = getKeypairFromEnvironment(&quot;SECRET_KEY&quot;);
+ 
+console.log(
+  `✅ Finished! We've loaded our secret key securely, using an env file!`,
+);
+</code></pre><p>运行<code>npx esrun generate-keypair.ts</code>。你应该看到以下结果：</p><pre><code class=language-bash>✅ Finished! We've loaded our secret key securely, using an env file!
+</code></pre><h1 id=从-solana-网络读取数据>从 Solana 网络读取数据</h1><p><strong>账户</strong>
+Solana 上的所有数据都存储在账户中。账户可以存储：</p><ul><li>SOL</li><li>其他代币，如 USDC</li><li>NFT</li><li>程序，就像我们在本课程中制作的电影评论程序！</li><li>程序数据，就像上面程序的电影评论！</li></ul><p><strong>SOL</strong>
+SOL 是 Solana 的“原生代币”——这意味着 SOL 用于支付交易费用、账户租金和其他常见费用。SOL 有时用 <code>◎</code>符号表示。每个 SOL 由 10 亿 <code>Lamports</code> 组成。</p><p>就像金融应用程序通常以美分（美元）和便士（英镑）进行数学运算一样，Solana 应用程序通常以 Lamports 的形式转移、花费、存储和处理 SOL，仅在向用户显示时才转换为完整的 SOL。</p><p><strong>地址</strong>
+地址唯一标识账户。地址通常显示为 base-58 编码的字符串，例如 dDCQNnDmNbFVi8cQhKAgXhyhXeJ625tvwsunRyRc7c8。Solana 上的大多数地址也是公钥。如上文所述，控制地址匹配私钥的人控制着该账户——例如，拥有私钥的人可以从该账户发送代币。</p><h2 id=操作>操作</h2><h3 id=加载密钥对>加载密钥对</h3><p>我们将继续使用上文的公钥。</p><p>创建一个名为<code>check-balance.ts</code> 的新文件，将<code>&lt;your public key></code>替换为您的公钥。</p><p>脚本加载公钥，连接到 DevNet，并检查余额：</p><pre><code class=language-typescript>import { Connection, LAMPORTS_PER_SOL, PublicKey } from &quot;@solana/web3.js&quot;;
+ 
+const publicKey = new PublicKey(&quot;&lt;your public key&gt;&quot;);
+ 
+const connection = new Connection(&quot;https://api.devnet.solana.com&quot;, &quot;confirmed&quot;);
+ 
+const balanceInLamports = await connection.getBalance(publicKey);
+ 
+const balanceInSOL = balanceInLamports / LAMPORTS_PER_SOL;
+ 
+console.log(
+  `💰 Finished! The balance for the wallet at address ${publicKey} is ${balanceInSOL}!`,
+);
+</code></pre><p>保存到文件中，并 <code>npx esrun check-balance.ts</code> 。你应该会看到类似的内容：</p><pre><code class=language-bash>💰 Finished! The balance for the wallet at address CpuER4CRpfkLmXAdk3LDbh7urNqWyLL2gzyxoycmEeZc is 0!
+</code></pre><h3 id=在-devnet-上获取一些-sol>在 DevNet 上获取一些 SOL</h3><p>在 Devnet 中，您可以获得免费的 SOL 用于开发。可以将 Devnet SOL 视为桌游用的钱币 - 它看起来有价值，但实际上没有价值。</p><p><a href=https://faucet.solana.com/>获取一些 Devnet SOL</a> 并使用您的密钥对的公钥作为地址。</p><p>选择您想要的任何数量的 SOL。</p><h3 id=检查您的余额>检查您的余额</h3><p>重新运行脚本。您应该会看到您的余额已更新：</p><pre><code class=language-bash>💰 Finished! The balance for the wallet at address CpuER4CRpfkLmXAdk3LDbh7urNqWyLL2gzyxoycmEeZc is 0.5!
+</code></pre><h3 id=查看任意地址的余额>查看任意地址的余额</h3><p>您可以修改脚本以检查任何钱包的余额。</p><pre><code class=language-typescript>import { Connection, LAMPORTS_PER_SOL, PublicKey } from &quot;@solana/web3.js&quot;;
+ 
+const suppliedPublicKey = process.argv[2];
+if (!suppliedPublicKey) {
+  throw new Error(&quot;Provide a public key to check the balance of!&quot;);
+}
+ 
+const connection = new Connection(&quot;https://api.devnet.solana.com&quot;, &quot;confirmed&quot;);
+ 
+const publicKey = new PublicKey(suppliedPublicKey);
+ 
+const balanceInLamports = await connection.getBalance(publicKey);
+ 
+const balanceInSOL = balanceInLamports / LAMPORTS_PER_SOL;
+ 
+console.log(
+  `✅ Finished! The balance for the wallet at address ${publicKey} is ${balanceInSOL}!`,
+);
+</code></pre><pre><code class=language-bash>% npx esrun check-balance.ts (some wallet address)
+✅ Finished! The balance for the wallet at address CpuER4CRpfkLmXAdk3LDbh7urNqWyLL2gzyxoycmEeZc is 5!
+</code></pre><h1 id=在-solana-网络上创建交易>在 Solana 网络上创建交易</h1><h2 id=交易是原子性的>交易是原子性的</h2><p>任何对链上数据的修改都是通过发送给程序的交易来完成的。</p><p>Solana 上的交易与其他地方的交易类似：它是原子性的。原子性意味着整个交易要么全部运行成功，要么全部失败。</p><p>想象一下在线支付：</p><ul><li>你的账户余额被扣除</li><li>银行将资金转移给商家</li></ul><p>这两件事都需要发生才能使交易成功。如果其中任何一个失败，都不应该发生任何事情，而不是支付给商家但不扣除你的账户，或者扣除账户但不支付给商家。</p><p>原子性意味着要么交易发生——意味着所有单个步骤都成功——要么整个交易失败。</p><h2 id=交易包含指令>交易包含指令</h2><p>Solana 上交易中的步骤称为指令。</p><p>每个指令包含：</p><ul><li>一个将被读取和/或写入的账户数组。这就是 Solana 快速的原因——影响不同账户的交易可以并行处理</li><li>要调用的程序的公钥</li><li>传递给被调用程序的数据，结构为字节数组</li></ul><p>当一个交易运行时，一个或多个 Solana 程序将使用交易中包含的指令被调用。</p><p>正如你所料，<code>@solana/web3.js</code> 提供了用于创建交易和指令的辅助函数。你可以使用构造函数 <code>new Transaction()</code> 创建一个新的交易。创建后，你可以使用 <code>add()</code> 方法向交易添加指令。</p><p>其中一个辅助函数是 <code>SystemProgram.transfer()</code>，它为系统程序创建一个指令来转移一些 SOL：</p><pre><code class=language-typescript>const transaction = new Transaction();
+ 
+const sendSolInstruction = SystemProgram.transfer({
+  fromPubkey: sender,
+  toPubkey: recipient,
+  lamports: LAMPORTS_PER_SOL * amount,
+});
+ 
+transaction.add(sendSolInstruction);
+</code></pre><p><code>SystemProgram.transfer()</code> 函数需要：</p><ul><li>发件人账户对应的公钥</li><li>收件人账户对应的公钥</li><li>要发送的 SOL 数量（以 lamports 为单位）。</li></ul><p><code>SystemProgram.transfer()</code> 返回用于将 SOL 从发件人发送到收件人的指令。</p><p>此指令中使用的程序将是<code>system</code>程序（地址为 <code>11111111111111111111111111111111</code>），数据是要传输的 SOL 数量（以 Lamports 为单位），账户将基于发件人和收件人。</p><p>然后，该指令可以添加到交易中。</p><p>一旦添加了所有指令，就需要将交易发送到集群并进行确认：</p><pre><code class=language-typescript>const signature = sendAndConfirmTransaction(connection, transaction, [
+  senderKeypair,
+]);
+</code></pre><p><code>sendAndConfirmTransaction()</code> 函数接受以下参数：</p><ul><li>一个集群连接</li><li>一个交易</li><li>一个密钥对数组，作为交易的签名者 - 在本例中，我们只有一个签名者：发送者。</li></ul><h2 id=交易手续费>交易手续费</h2><p>交易手续费是 Solana 经济的组成部分，作为对验证者网络处理交易所需的 CPU 和 GPU 资源的补偿。Solana 交易手续费是确定的。</p><p>交易签名者数组中包含的第一个签名者负责支付交易手续费。如果该签名者的账户中没有足够的 SOL 来支付交易手续费，则交易将被丢弃，并出现类似以下错误：</p><pre><code class=language-bash>&gt; Transaction simulation failed: Attempt to debit an account but found no record of a prior credit.
+</code></pre><p>如果你遇到这个错误，那是因为你的密钥对是全新的，没有任何 SOL 来支付交易费用。让我们通过在设置连接后添加以下几行代码来解决这个问题：</p><pre><code class=language-typescript>await airdropIfRequired(
+  connection,
+  keypair.publicKey,
+  1 * LAMPORTS_PER_SOL,
+  0.5 * LAMPORTS_PER_SOL,
+);
+</code></pre><p>这会向你的账户存入 1 个 SOL，你可以用它来测试。这在主网（Mainnet）上行不通，因为在主网上 SOL 具有实际价值。但在本地和开发网（Devnet）上进行测试时，这非常方便。</p><p>你也可以使用 Solana 命令行界面（CLI）命令 <code>solana airdrop 1</code> 来在你的账户中获得免费的测试 SOL，无论是在本地还是在开发网上进行测试。</p><h2 id=solana-区块浏览器>Solana 区块浏览器</h2><p><img src=https://static.ganymedenil.com/2025/01/23/image-20250123171746524.png alt=image-20250123171746524></p><p>所有在区块链上的交易都可以在 <a href=http://explorer.solana.com/>Solana 区块浏览器</a>上公开查看。例如，你可以使用上面示例中 <code>sendAndConfirmTransaction()</code> 返回的签名，在 Solana 区块浏览器中搜索该签名，然后查看：</p><ul><li>何时发生</li><li>包含在哪个区块中</li><li>交易费用</li><li>以及更多！</li></ul><p><img src=https://static.ganymedenil.com/2025/01/23/image-20250123171941102.png alt=image-20250123171941102></p><h2 id=完整代码>完整代码</h2><p>创建一个名为<code>transfer.ts</code>的文件：</p><pre><code class=language-typescript>import {
+  Connection,
+  Transaction,
+  SystemProgram,
+  sendAndConfirmTransaction,
+  PublicKey,
+} from &quot;@solana/web3.js&quot;;
+import &quot;dotenv/config&quot;;
+import { getKeypairFromEnvironment } from &quot;@solana-developers/helpers&quot;;
+ 
+const suppliedToPubkey = &quot;CpuER4CRpfkLmXAdk3LDbh7urNqWyLL2gzyxoycmEeZc&quot;;
+ 
+if (!suppliedToPubkey) {
+  console.log(`Please provide a public key to send to`);
+  process.exit(1);
+}
+ 
+const senderKeypair = getKeypairFromEnvironment(&quot;SECRET_KEY&quot;);
+ 
+console.log(`suppliedToPubkey: ${suppliedToPubkey}`);
+ 
+const toPubkey = new PublicKey(suppliedToPubkey);
+ 
+const connection = new Connection(&quot;https://api.devnet.solana.com&quot;, &quot;confirmed&quot;);
+ 
+console.log(
+  `✅ Loaded our own keypair, the destination public key, and connected to Solana`,
+);
+</code></pre><p>运行脚本以确保它连接、加载密钥对并加载：</p><pre><code class=language-bash>npx esrun transfer.ts
+</code></pre><p>添加以下内容以完成交易并发送：</p><pre><code class=language-typescript>console.log(
+  `✅ Loaded our own keypair, the destination public key, and connected to Solana`,
+);
+ 
+const transaction = new Transaction();
+ 
+const LAMPORTS_TO_SEND = 5000;
+ 
+const sendSolInstruction = SystemProgram.transfer({
+  fromPubkey: senderKeypair.publicKey,
+  toPubkey,
+  lamports: LAMPORTS_TO_SEND,
+});
+ 
+transaction.add(sendSolInstruction);
+ 
+const signature = await sendAndConfirmTransaction(connection, transaction, [
+  senderKeypair,
+]);
+ 
+console.log(
+  `💸 Finished! Sent ${LAMPORTS_TO_SEND} to the address ${toPubkey}. `,
+);
+console.log(`Transaction signature is ${signature}!`);
+</code></pre><p>执行脚本进行交易</p><pre><code class=language-typescript>npx esrun transfer.ts
+</code></pre><h1 id=使用自定义链上程序>使用自定义链上程序</h1><p>在上文中，我们使用了来自 <code>@solana/web3.js</code> 的 <code>SystemProgram.transfer()</code> 函数，该函数会创建一个用于 <code>System</code> 程序来转移 SOL 的指令。</p><p>然而，当与其他程序交互时，您需要手动创建指令。使用 <code>@solana/web3.js</code>，您可以使用 <code>TransactionInstruction</code> 构造函数来创建指令：</p><pre><code class=language-typescript>const instruction = new TransactionInstruction({
+  programId: PublicKey;
+  keys: [
+    {
+      pubkey: Pubkey,
+      isSigner: boolean,
+      isWritable: boolean,
+    },
+  ],
+  data?: Buffer;
+});
+</code></pre><p><code>TransactionInstruction()</code> 接受 3 个字段：</p><ul><li><p><code>programId</code> 字段的含义非常明确：它是程序的公钥（也称为“地址”或“程序 ID”）。</p></li><li><p><code>keys</code> 是一个账户数组，以及这些账户在交易期间将如何被使用。您需要了解您正在调用的程序的行为，并确保在数组中提供所有必要的账户。</p><ul><li><code>pubkey</code> - 账户的公钥</li><li><code>isSigner</code> - 一个布尔值，表示该账户是否是交易的签名者</li><li><code>isWritable</code> - 一个布尔值，表示该账户在交易执行期间是否会被写入</li></ul></li><li><p>一个可选的 <code>Buffer</code>，包含要传递给程序的数据。我们现在将忽略 <code>data</code> 字段，但在以后的文章中会重新讨论它。</p></li></ul><p>创建指令后，我们将其添加到交易中，将交易发送到我们的 RPC 进行处理和确认，然后查看交易签名。</p><pre><code class=language-typescript>const transaction = new web3.Transaction().add(instruction);
+ 
+const signature = await web3.sendAndConfirmTransaction(
+  connection,
+  transaction,
+  [payer],
+);
+ 
+console.log(`✅ Success! Transaction signature is: ${signature}`);
+</code></pre><h2 id=编写-ping-计数器程序的交易>编写 ping 计数器程序的交易</h2><p>我们将创建一个脚本，用于 ping 一个链上程序，该程序每次被 ping 时都会递增一个计数器。该程序位于 Solana Devnet 上，地址为 <code>ChT1B39WKLS8qUrkLvFDXMhEJ4F1XZzwUNHUt4AU9aVa</code>。该程序将其数据存储在一个特定账户中，地址为 <code>Ah9K7dQ8EHaZqcAsgBW8w37yN2eAy3koFmUn4x3CJtod</code>。</p><p><img src=https://static.ganymedenil.com/2025/01/23/pdas-global-state.svg alt=pdas-global-state></p><p>基础框架 #
+我们将使用之前在“数据写入简介”中创建的相同的包和 .env 文件。</p><p>将文件命名为 <code>send-ping-transaction.ts</code>：</p><pre><code class=language-typescript>import * as web3 from &quot;@solana/web3.js&quot;;
+import &quot;dotenv/config&quot;;
+import {
+  getKeypairFromEnvironment,
+  airdropIfRequired,
+} from &quot;@solana-developers/helpers&quot;;
+ 
+const payer = getKeypairFromEnvironment(&quot;SECRET_KEY&quot;);
+const connection = new web3.Connection(web3.clusterApiUrl(&quot;devnet&quot;));
+ 
+const newBalance = await airdropIfRequired(
+  connection,
+  payer.publicKey,
+  1 * web3.LAMPORTS_PER_SOL,
+  0.5 * web3.LAMPORTS_PER_SOL,
+);
+</code></pre><p>这将连接到 Solana Devnet ，并在需要时请求一些测试用的 Lamports。</p><h2 id=ping-程序>Ping 程序</h2><p>现在让我们与 Ping 程序交互！为此，我们需要：</p><ol><li>创建一笔交易</li><li>创建一条指令</li><li>将指令添加到交易中</li><li>发送交易</li></ol><p>记住，这里最具挑战性的部分是在指令中包含正确的信息。我们知道我们要调用的程序的地址。我们也知道该程序将数据写入一个单独的账户，我们也知道该账户的地址。让我们将这两个地址的字符串版本作为常量添加到文件的顶部：</p><pre><code class=language-typescript>const PING_PROGRAM_ADDRESS = &quot;ChT1B39WKLS8qUrkLvFDXMhEJ4F1XZzwUNHUt4AU9aVa&quot;;
+const PING_PROGRAM_DATA_ADDRESS =
+  &quot;Ah9K7dQ8EHaZqcAsgBW8w37yN2eAy3koFmUn4x3CJtod&quot;;
+</code></pre><p>现在让我们创建一个新的交易，然后初始化一个程序账户的公钥，以及另一个数据账户的公钥。</p><pre><code class=language-typescript>const transaction = new web3.Transaction();
+const programId = new web3.PublicKey(PING_PROGRAM_ADDRESS);
+const pingProgramDataId = new web3.PublicKey(PING_PROGRAM_DATA_ADDRESS);
+</code></pre><p>接下来，让我们创建指令。记住，指令需要包含 Ping 程序的公钥，还需要包含一个数组，其中包含所有将要读取或写入的账户。在这个示例程序中，只需要上面提到的数据账户。</p><pre><code class=language-typescript>const transaction = new web3.Transaction();
+const programId = new web3.PublicKey(PING_PROGRAM_ADDRESS);
+const pingProgramDataId = new web3.PublicKey(PING_PROGRAM_DATA_ADDRESS);
+ 
+const instruction = new web3.TransactionInstruction({
+  keys: [
+    {
+      pubkey: pingProgramDataId,
+      isSigner: false,
+      isWritable: true,
+    },
+  ],
+  programId,
+});
+</code></pre><p>接下来，让我们将这条指令添加到我们创建的交易中。然后，通过传入连接、交易和付款人来调用 <code>sendAndConfirmTransaction()</code>。最后，让我们记录该函数调用的结果，以便我们可以在 Solana Explorer 上查找它。</p><pre><code class=language-typescript>transaction.add(instruction);
+ 
+const signature = await web3.sendAndConfirmTransaction(
+  connection,
+  transaction,
+  [payer],
+);
+ 
+console.log(`✅ Transaction completed! Signature is ${signature}`);
+</code></pre><h3 id=运行-ping-客户端并检查-solana-浏览器>运行 ping 客户端并检查 Solana 浏览器</h3><p>现在使用以下命令运行代码：</p><pre><code class=language-bash>npx esrun send-ping-transaction.ts
+</code></pre><p>可能需要一两分钟，但你应该会在控制台中看到一个长字符串，如下所示：</p><pre><code class=language-bash>✅ Transaction completed! Signature is 4Kpb4EQ3RPBfqQDNZzKFc2MJo4F7vAajoaNQdLmsAhZ4UF9fvMUTaNmqERXQPu6oxjSSviL7sDbTLdy4Vrk7qXbS
+</code></pre><p>复制交易签名。然后访问<a href="https://explorer.solana.com/?cluster=devnet">Devnet上的 Solana 浏览器</a>。将签名粘贴到 Solana 浏览器顶部的搜索栏中（确保你已连接到开发网）并按回车键。你应该会看到有关交易的所有详细信息。如果你一直滚动到底部，那么你将看到程序日志，其中显示了程序被 ping 的次数，包括你的 ping。</p><p><img src=https://static.ganymedenil.com/2025/01/23/solana-explorer-ping-result.png alt=solana-explorer-ping-result></p><p>滚动浏览浏览器并查看你所看到的内容：</p><ul><li>账户输入将包括：<ul><li>你的付款人地址 - 交易中扣除 5000 lamports</li><li>ping 程序的程序地址</li><li>ping 程序的数据地址</li></ul></li><li>指令部分将包含一条没有数据的指令 - ping 程序是一个非常简单的程序，因此它不需要任何数据。</li><li>程序指令日志显示 ping 程序的日志。</li></ul><p>如果你希望将来更容易在 Solana 浏览器中查看交易，只需将你的 console.log 更改为以下内容：</p><pre><code class=language-typescript>console.log(
+  `You can view your transaction on Solana Explorer at:\nhttps://explorer.solana.com/tx/${signature}?cluster=devnet`,
+);
+</code></pre><p>就这样，你就在 Solana 网络上调用程序并在链上写入数据了！</p></div><div class=article-footer><blockquote class=mt-2x><ul class="post-copyright list-unstyled"><li class="post-copyright-link hidden-xs"><strong>本文链接:</strong>
+<a href=https://www.ganymedenil.com/2025/01/23/solana-tutorial-1.html title="Solana 链开发实战（一）" target=_blank rel=external>https://www.ganymedenil.com/2025/01/23/solana-tutorial-1.html</a></li><li class=post-copyright-license><strong>版权声明：</strong><a href=http://creativecommons.org/licenses/by/4.0/deed.zh target=_blank rel=external>本博客所有文章除特别声明外，均采用 CC BY 4.0 CN协议 许可协议。转载请注明出处</a></li></ul></blockquote><div class="panel panel-default panel-badger"><div class=panel-body><figure class=media><div class=media-left><a href=https://github.com/GanymedeNil target=_blank class="img-burn thumb-sm visible-lg"><img src=/avatar.png class="img-rounded w-full" alt></a></div><div class=media-body><h3 class=media-heading><a href=https://github.com/GanymedeNil target=_blank><span class=text-dark>Ganymede Nil</span><small class=ml-1x>Developer</small></a></h3><div>喜欢新事物，关注后端动态，对新的技术有追求； 喜欢 coding。</div></div></figure></div></div></div></article><section id=comments><div id=vcomments></div></section></div><nav class="bar bar-footer clearfix" data-stick-bottom><div class=bar-inner><ul class="pager pull-left"><li class=prev><a href=/2024/04/20/Gemma-JAX-inference.html title="Gemma JAX 推理"><i class="icon icon-angle-left" aria-hidden=true></i><span>&nbsp;&nbsp;下一篇</span></a></li><li class=toggle-toc><a class="toggle-btn collapsed" data-toggle=collapse href=#collapseToc aria-expanded=false title=文章目录 role=button><span>[&nbsp;</span><span>文章目录</span>
+<i class="text-collapsed icon icon-anchor"></i>
+<i class="text-in icon icon-close"></i>
+<span>]</span></a></li></ul><button type=button class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle=modal data-target=#donateModal><span>赏</span></button><div class=bar-right><div class=share-component data-sites=weibo,qq,wechat,facebook,twitter data-mobile-sites=weibo,qq,qzone></div></div></div></nav><div class="modal modal-center modal-small modal-xs-full fade" id=donateModal tabindex=-1 role=dialog><div class=modal-dialog role=document><div class="modal-content donate"><button type=button class=close data-dismiss=modal aria-label=Close><span aria-hidden=true>&#215;</span></button><div class=modal-body><div class=donate-box><div class=donate-head><p>感谢您的支持,我会继续努力的!</p></div><div class=tab-content><div role=tabpanel class="tab-pane fade active in" id=alipay><div class=donate-payimg><img src=/donate/alipay.jpg alt=扫码支持 title=扫一扫></div><p class="text-muted mv">扫码打赏, 多少你说了算~</p><p class=text-grey>打开支付宝扫一扫，即可进行扫码打赏哦~</p></div><div role=tabpanel class="tab-pane fade" id=wechatpay><div class=donate-payimg><img src=/donate/weipay.jpg alt=扫码支持 title=扫一扫></div><p class="text-muted mv">扫码打赏, 多少你说了算~</p><p class=text-grey>打开微信扫一扫，即可进行扫码打赏哦</p></div></div><div class=donate-footer><ul class="nav nav-tabs nav-justified" role=tablist><li role=presentation class=active><a href=#alipay id=alipay-tab role=tab data-toggle=tab aria-controls=alipay aria-expanded=true><i class="icon icon-alipay"></i> 支付宝</a></li><li role=presentation><a href=#wechatpay role=tab id=wechatpay-tab data-toggle=tab aria-controls=wechatpay aria-expanded=false><i class="icon icon-wepay"></i>
+微信支付</a></li></ul></div></div></div></div></div></div></main><footer class=footer itemscope itemtype=http://schema.org/WPFooter><ul class=social-links><li><a href=https://github.com/GanymedeNil target=_blank title=github data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li><li><a href=/index.xml target=_blank title=rss data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li><li><a href=http://weibo.com/jinhongyang target=_blank title=weibo data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li></ul><div class=copyright>&copy;2017 -
+2025<div class=publishby>Theme by <a href=https://github.com/cofess target=_blank>cofess </a>base on<a href=https://github.com/cofess/hexo-theme-pure target=_blank> pure</a>.</div><div>powered by <a href=https://gohugo.io/ target=_blank>hugo</a></div></div></footer><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_SVG"></script>
+<script type=text/x-mathjax-config>
+    MathJax.Hub.Config({
+            showMathMenu: false, //disables context menu
+            tex2jax: {
+            inlineMath: [ ['$','$'], ['\\(','\\)'] ]
+           }
+    });
+</script><script src=https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js></script>
+<script>window.jQuery||document.write('<script src="js/jquery.min.js"><\/script>')</script><script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/php.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/bash.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/cmake.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/dockerfile.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/json.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/lua.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/makefile.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/nginx.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/rust.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/shell.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/yaml.min.js defer></script><script>hljs.configure({tabReplace:"    ",classPrefix:""}),hljs.initHighlightingOnLoad()</script>
+<script src=/js/application.min.7ef841188add421ff966768c2e5f1a1551076353a65f0d39fbaf504b456936f8.js></script>
+<script src=/js/plugin.min.738a460bf4317fac61717f1bca393e53d00973db9754d9f0a81c7312d5874840.js></script>
+<script>(function(e){var t={TRANSLATION:{POSTS:"文章",PAGES:"页面",CATEGORIES:"分类",TAGS:"标签",UNTITLED:"(未命名)"},ROOT_URL:"https://www.ganymedenil.com",CONTENT_URL:"https://www.ganymedenil.com/searchindex.json "};e.INSIGHT_CONFIG=t})(window)</script><script type=text/javascript src=/js/insight.min.716b0c6a00b68ccc31a2b65345f3412f4246ffa94a90f8e25d525528b4504f9937880692bbe619023233caba5d0a17ebe23d7cfb57cd3a88f23ea337ad5e4d00.js defer></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js></script>
+<script>tocbot.init({tocSelector:".js-toc",contentSelector:".js-toc-content",headingSelector:"h1, h2, h3",hasInnerContainers:!0})</script><script src=https://cdn1.lncld.net/static/js/3.0.4/av-min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/valine></script>
+<script type=text/javascript>var GUEST=["nick","mail","link"],meta="nick,mail",meta=meta.split(",").filter(function(e){return GUEST.indexOf(e)>-1});new Valine({el:"#vcomments",verify:null,notify:null,appId:"lI57bh1xqblhjL3OUrOcnX2R-gzGzoHsz",appKey:"2aCHvIxz6nKXqP0sBq42gBhC",placeholder:"enjoy~",avatar:"mm",meta,pageSize:"10"||10,visitor:!1})</script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-140810980-1"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","UA-140810980-1")</script></body></html>

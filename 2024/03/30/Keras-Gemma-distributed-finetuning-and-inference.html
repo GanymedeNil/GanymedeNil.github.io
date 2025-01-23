@@ -1,0 +1,194 @@
+<!doctype html><html lang=zh><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>在使用 Keras 进行 Gemma 模型的分布式微调和推理 - ZA TAN</title><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui"><meta name=renderer content="webkit"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="black"><meta name=format-detection content="telephone=no,email=no,adress=no"><meta name=theme-color content="#000000"><meta http-equiv=window-target content="_top"><meta name=description content="Gemma 是一个轻量级、先进的开放模型家族，由用于创建 Google Gemini 模型的研究和技术构建。Gemma 可以进一步微调以满足特定需求。但是，像 Gemma 这样的大型语言模型可能会非常大，有些可能不适合在单个加速器上进行微调。在这种情况下，有两种一般方法来对它们进行微调：
+参数高效微调（PEFT），旨在通过牺牲一些保真度来缩小有效模型大小。LoRA 属于这一类别，在 Keras 中使用 LoRA 微调 Gemma 模型1的教程演示了如何使用 KerasNLP 在单个 GPU 上使用 LoRA 微调 Gemma 2B 模型 gemma_2b_en。
+使用模型并行性的全参数微调。模型并行性将单个模型的权重分布在多个设备上，并实现水平扩展。您可以在这个 Keras指南2中了解更多关于分布式训练的信息。
+本教程指导您如何使用 Keras 与 JAX 后端，通过 LoRA 和模型并行分布式训练在 Google 的张量处理单元（TPU）上微调 Gemma 7B 模型。请注意，在本教程中可以关闭 LoRA，进行较慢但更准确的全参数调整。
+"><meta name=generator content="Hugo 0.110.0 with theme pure"><title>在使用 Keras 进行 Gemma 模型的分布式微调和推理 - ZA TAN</title><link rel=icon href=/favicon.png type=image/x-icon><link rel=stylesheet href=/css/style.min.c58e22f1aa6179cd5cb60b9e08421a2b9a9c9fe9352d095e051b51aae209e5c0.css><link rel=stylesheet href=https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css async><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css async><meta property="og:title" content="在使用 Keras 进行 Gemma 模型的分布式微调和推理"><meta property="og:description" content="Gemma 是一个轻量级、先进的开放模型家族，由用于创建 Google Gemini 模型的研究和技术构建。Gemma 可以进一步微调以满足特定需求。但是，像 Gemma 这样的大型语言模型可能会非常大，有些可能不适合在单个加速器上进行微调。在这种情况下，有两种一般方法来对它们进行微调：
+
+
+参数高效微调（PEFT），旨在通过牺牲一些保真度来缩小有效模型大小。LoRA 属于这一类别，在 Keras 中使用 LoRA 微调 Gemma 模型1的教程演示了如何使用 KerasNLP 在单个 GPU 上使用 LoRA 微调 Gemma 2B 模型 gemma_2b_en。
+
+
+使用模型并行性的全参数微调。模型并行性将单个模型的权重分布在多个设备上，并实现水平扩展。您可以在这个 Keras指南2中了解更多关于分布式训练的信息。
+
+
+本教程指导您如何使用 Keras 与 JAX 后端，通过 LoRA 和模型并行分布式训练在 Google 的张量处理单元（TPU）上微调 Gemma 7B 模型。请注意，在本教程中可以关闭 LoRA，进行较慢但更准确的全参数调整。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.ganymedenil.com/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html"><meta property="article:section" content="posts"><meta property="article:published_time" content="2024-03-30T22:32:29+00:00"><meta property="article:modified_time" content="2024-03-30T22:32:29+00:00"><meta itemprop=name content="在使用 Keras 进行 Gemma 模型的分布式微调和推理"><meta itemprop=description content="Gemma 是一个轻量级、先进的开放模型家族，由用于创建 Google Gemini 模型的研究和技术构建。Gemma 可以进一步微调以满足特定需求。但是，像 Gemma 这样的大型语言模型可能会非常大，有些可能不适合在单个加速器上进行微调。在这种情况下，有两种一般方法来对它们进行微调：
+
+
+参数高效微调（PEFT），旨在通过牺牲一些保真度来缩小有效模型大小。LoRA 属于这一类别，在 Keras 中使用 LoRA 微调 Gemma 模型1的教程演示了如何使用 KerasNLP 在单个 GPU 上使用 LoRA 微调 Gemma 2B 模型 gemma_2b_en。
+
+
+使用模型并行性的全参数微调。模型并行性将单个模型的权重分布在多个设备上，并实现水平扩展。您可以在这个 Keras指南2中了解更多关于分布式训练的信息。
+
+
+本教程指导您如何使用 Keras 与 JAX 后端，通过 LoRA 和模型并行分布式训练在 Google 的张量处理单元（TPU）上微调 Gemma 7B 模型。请注意，在本教程中可以关闭 LoRA，进行较慢但更准确的全参数调整。"><meta itemprop=datePublished content="2024-03-30T22:32:29+00:00"><meta itemprop=dateModified content="2024-03-30T22:32:29+00:00"><meta itemprop=wordCount content="2566"><meta itemprop=keywords content="gemma,kerasNLP,"><meta name=twitter:card content="summary"><meta name=twitter:title content="在使用 Keras 进行 Gemma 模型的分布式微调和推理"><meta name=twitter:description content="Gemma 是一个轻量级、先进的开放模型家族，由用于创建 Google Gemini 模型的研究和技术构建。Gemma 可以进一步微调以满足特定需求。但是，像 Gemma 这样的大型语言模型可能会非常大，有些可能不适合在单个加速器上进行微调。在这种情况下，有两种一般方法来对它们进行微调：
+
+
+参数高效微调（PEFT），旨在通过牺牲一些保真度来缩小有效模型大小。LoRA 属于这一类别，在 Keras 中使用 LoRA 微调 Gemma 模型1的教程演示了如何使用 KerasNLP 在单个 GPU 上使用 LoRA 微调 Gemma 2B 模型 gemma_2b_en。
+
+
+使用模型并行性的全参数微调。模型并行性将单个模型的权重分布在多个设备上，并实现水平扩展。您可以在这个 Keras指南2中了解更多关于分布式训练的信息。
+
+
+本教程指导您如何使用 Keras 与 JAX 后端，通过 LoRA 和模型并行分布式训练在 Google 的张量处理单元（TPU）上微调 Gemma 7B 模型。请注意，在本教程中可以关闭 LoRA，进行较慢但更准确的全参数调整。"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head></head><body class="main-center theme-white" itemscope itemtype=http://schema.org/WebPage><header class=header itemscope itemtype=http://schema.org/WPHeader><div class=slimContent><div class=navbar-header><div class="profile-block text-center"><a id=avatar href=https://github.com/GanymedeNil target=_blank><img class="img-circle img-rotate" src=/avatar.png width=200 height=200></a><h2 id=name class="hidden-xs hidden-sm">Ganymede Nil</h2><h3 id=title class="hidden-xs hidden-sm hidden-md">Developer</h3><small id=location class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>BeiJing, China</small></div><div class=search id=search-form-wrap><form class="search-form sidebar-form"><div class=input-group><input type=text class="search-form-input form-control" placeholder=搜索>
+<span class=input-group-btn><button type=submit class="search-form-submit btn btn-flat" onclick=return!1><i class="icon icon-search"></i></button></span></div><div class=ins-search><div class=ins-search-mask></div><div class=ins-search-container><div class=ins-input-wrapper><input type=text class=ins-search-input placeholder=想要查找什么... x-webkit-speech>
+<button type=button class="close ins-close ins-selectable" data-dismiss=modal aria-label=Close><span aria-hidden=true>×</span></button></div><div class=ins-section-wrapper><div class=ins-section-container></div></div></div></div></form></div><button class="navbar-toggle collapsed" type=button data-toggle=collapse data-target=#main-navbar aria-controls=main-navbar aria-expanded=false>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span></button></div><nav id=main-navbar class="collapse navbar-collapse" itemscope itemtype=http://schema.org/SiteNavigationElement role=navigation><ul class="nav navbar-nav main-nav"><li class="menu-item menu-item-home"><a href=/><i class="icon icon-home-fill"></i>
+<span class=menu-title>首页</span></a></li><li class="menu-item menu-item-archives"><a href=/posts><i class="icon icon-archives-fill"></i>
+<span class=menu-title>归档</span></a></li><li class="menu-item menu-item-categories"><a href=/categories><i class="icon icon-folder"></i>
+<span class=menu-title>分类</span></a></li><li class="menu-item menu-item-tags"><a href=/tags><i class="icon icon-tags"></i>
+<span class=menu-title>标签</span></a></li><li class="menu-item menu-item-links"><a href=/links><i class="icon icon-friendship"></i>
+<span class=menu-title>友链</span></a></li><li class="menu-item menu-item-about"><a href=/about><i class="icon icon-cup-fill"></i>
+<span class=menu-title>关于</span></a></li></ul></nav></div></header><aside class=sidebar itemscope itemtype=http://schema.org/WPSideBar><div class=slimContent><div class=widget><h3 class=widget-title>公告</h3><div class=widget-body><div id=board><div class=content><p>欢迎交流与分享经验!~</p></div></div></div></div><div class=widget><h3 class=widget-title>分类</h3><div class=widget-body><ul class=category-list><li class=category-list-item><a href=/categories/AI/ class=category-list-link>AI</a><span class=category-list-count>6</span></li><li class=category-list-item><a href=/categories/Go/ class=category-list-link>Go</a><span class=category-list-count>2</span></li><li class=category-list-item><a href=/categories/Laravel/ class=category-list-link>Laravel</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/PHP/ class=category-list-link>PHP</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/go%E5%9F%BA%E7%A1%80%E5%BA%93/ class=category-list-link>go基础库</a><span class=category-list-count>52</span></li><li class=category-list-item><a href=/categories/php7/ class=category-list-link>php7</a><span class=category-list-count>5</span></li><li class=category-list-item><a href=/categories/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9C%8B%E7%9A%84NGINX/ class=category-list-link>写给大忙人看的NGINX</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9C%8B%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B9%A6%E7%B3%BB%E7%B1%BB/ class=category-list-link>写给大忙人看的技术书系类</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%89%8D%E7%AB%AF/ class=category-list-link>前端</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/ class=category-list-link>区块链</a><span class=category-list-count>3</span></li><li class=category-list-item><a href=/categories/%E5%BC%80%E5%8F%91/ class=category-list-link>开发</a><span class=category-list-count>17</span></li><li class=category-list-item><a href=/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/ class=category-list-link>微服务</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E6%9E%B6%E6%9E%84/ class=category-list-link>架构</a><span class=category-list-count>1</span></li></ul></div></div><div class=widget><h3 class=widget-title>标签</h3><div class=widget-body><ul class=tag-list><li class=tag-list-item><a href=/tags/Hardhat/ class=tag-list-link>Hardhat</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/JAX/ class=tag-list-link>JAX</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/LLM/ class=tag-list-link>LLM</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/NFT/ class=tag-list-link>NFT</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Php-Storm/ class=tag-list-link>Php-Storm</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Predis/ class=tag-list-link>Predis</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/SOL/ class=tag-list-link>SOL</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Solana/ class=tag-list-link>Solana</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Solidity/ class=tag-list-link>Solidity</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/ddd/ class=tag-list-link>ddd</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/docker/ class=tag-list-link>docker</a><span class=tag-list-count>4</span></li><li class=tag-list-item><a href=/tags/gemma/ class=tag-list-link>gemma</a><span class=tag-list-count>5</span></li><li class=tag-list-item><a href=/tags/go/ class=tag-list-link>go</a><span class=tag-list-count>57</span></li><li class=tag-list-item><a href=/tags/hexo/ class=tag-list-link>hexo</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/kerasNLP/ class=tag-list-link>kerasNLP</a><span class=tag-list-count>3</span></li><li class=tag-list-item><a href=/tags/laravel/ class=tag-list-link>laravel</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/linux/ class=tag-list-link>linux</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/nginx/ class=tag-list-link>nginx</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/nuxt/ class=tag-list-link>nuxt</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/php/ class=tag-list-link>php</a><span class=tag-list-count>5</span></li><li class=tag-list-item><a href=/tags/redis/ class=tag-list-link>redis</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/rust/ class=tag-list-link>rust</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/swoole/ class=tag-list-link>swoole</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/web3/ class=tag-list-link>web3</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/xdebug/ class=tag-list-link>xdebug</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E4%BB%A5%E5%A4%AA%E5%9D%8A/ class=tag-list-link>以太坊</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E6%80%BB%E7%BB%93/ class=tag-list-link>总结</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/ class=tag-list-link>智能合约</a><span class=tag-list-count>1</span></li></ul></div></div><div class=widget><h3 class=widget-title>最新文章</h3><div class=widget-body><ul class="recent-post-list list-unstyled no-thumbnail"><li><div class=item-inner><p class=item-title><a href=/2025/01/23/solana-tutorial-1.html class=title>Solana 链开发实战（一）</a></p><p class=item-date><time datetime="2025-01-23 18:08:23 +0000 UTC" itemprop=datePublished>2025-01-23</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/04/20/Gemma-JAX-inference.html class=title>Gemma JAX 推理</a></p><p class=item-date><time datetime="2024-04-20 23:10:39 +0000 UTC" itemprop=datePublished>2024-04-20</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html class=title>在使用 Keras 进行 Gemma 模型的分布式微调和推理</a></p><p class=item-date><time datetime="2024-03-30 22:32:29 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html class=title>在 Keras 中使用 LoRA 微调 Gemma 模型</a></p><p class=item-date><time datetime="2024-03-30 21:42:12 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Get-started-with-Gemma-using-KerasNLP.html class=title>使用 KerasNLP 快速开始 Gemma</a></p><p class=item-date><time datetime="2024-03-30 19:20:02 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li></ul></div></div></div></aside><aside class="sidebar sidebar-toc collapse" id=collapseToc itemscope itemtype=http://schema.org/WPSideBar><div class=slimContent><h4 class=toc-title>文章目录</h4><nav id=toc class="js-toc toc"></nav></div></aside><main class=main role=main><div class=content><article id=- class="article article-type-" itemscope itemtype=http://schema.org/BlogPosting><div class=article-header><h1 itemprop=name><a class=article-title href=/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html>在使用 Keras 进行 Gemma 模型的分布式微调和推理</a></h1><div class=article-meta><span class=article-date><i class="icon icon-calendar-check"></i>&nbsp;
+<a href=/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html class=article-date><time datetime="2024-03-30 22:32:29 +0000 UTC" itemprop=datePublished>2024-03-30</time></a></span>
+<span class=article-category><i class="icon icon-folder"></i>&nbsp;
+<a class=article-category-link href=/categories/%E5%BC%80%E5%8F%91/>开发</a>
+<a class=article-category-link href=/categories/AI/>AI</a></span>
+<span class=article-tag><i class="icon icon-tags"></i>&nbsp;
+<a class=article-tag-link href=/tags/gemma/>gemma</a>
+<a class=article-tag-link href=/tags/kerasNLP/>kerasNLP</a></span>
+<span class=post-comment><i class="icon icon-comment"></i>&nbsp;<a href=/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html#comments class=article-comment-link>评论</a></span>
+<span class="post-wordcount hidden-xs" itemprop=wordCount>字数统计: 2566字</span>
+<span class="post-readcount hidden-xs" itemprop=timeRequired>阅读时长: 6分</span></div></div><div class="article-entry marked-body js-toc-content" itemprop=articleBody><p>Gemma 是一个轻量级、先进的开放模型家族，由用于创建 Google Gemini 模型的研究和技术构建。Gemma 可以进一步微调以满足特定需求。但是，像 Gemma 这样的大型语言模型可能会非常大，有些可能不适合在单个加速器上进行微调。在这种情况下，有两种一般方法来对它们进行微调：</p><ol><li><p>参数高效微调（PEFT），旨在通过牺牲一些保真度来缩小有效模型大小。LoRA 属于这一类别，在 Keras 中使用 LoRA 微调 Gemma 模型<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>的教程演示了如何使用 KerasNLP 在单个 GPU 上使用 LoRA 微调 Gemma 2B 模型 gemma_2b_en。</p></li><li><p>使用模型并行性的全参数微调。模型并行性将单个模型的权重分布在多个设备上，并实现水平扩展。您可以在这个 Keras指南<sup id=fnref:2><a href=#fn:2 class=footnote-ref role=doc-noteref>2</a></sup>中了解更多关于分布式训练的信息。</p></li></ol><p>本教程指导您如何使用 Keras 与 JAX 后端，通过 LoRA 和模型并行分布式训练在 Google 的张量处理单元（TPU）上微调 Gemma 7B 模型。请注意，在本教程中可以关闭 LoRA，进行较慢但更准确的全参数调整。</p><h2 id=使用加速器>使用加速器</h2><p>技术上，您可以在本教程中使用 TPU 或 GPU。</p><h3 id=关于-tpu-环境的说明>关于 TPU 环境的说明</h3><p>Google 提供了3种TPU产品：</p><ul><li>Colab<sup id=fnref:3><a href=#fn:3 class=footnote-ref role=doc-noteref>3</a></sup> 提供的 TPU v2 对于本教程来说不够用。</li><li>Kaggle<sup id=fnref:4><a href=#fn:4 class=footnote-ref role=doc-noteref>4</a></sup> 免费提供 TPU v3，适用于本教程。</li><li>Cloud TPU<sup id=fnref:5><a href=#fn:5 class=footnote-ref role=doc-noteref>5</a></sup> 提供 TPU v3 和更新一代的 TPU。设置它的一种方式是：<ol><li>创建一个新的 TPU VM<sup id=fnref:6><a href=#fn:6 class=footnote-ref role=doc-noteref>6</a></sup></li><li>为您打算使用的 Jupyter 服务器端口设置SSH端口转发<sup id=fnref:7><a href=#fn:7 class=footnote-ref role=doc-noteref>7</a></sup></li><li>在 TPU VM 上安装 Jupyter 并启动，然后通过“连接到本地运行时”连接到 Colab</li></ol></li></ul><h3 id=关于多-gpu-设置的说明>关于多 GPU 设置的说明</h3><p>虽然本教程侧重于 TPU 的使用案例，但如果您有多 GPU 机器，可以轻松地根据自己的需要调整它。</p><p>如果您倾向于通过 Colab 工作，也可以直接通过 Colab 连接菜单中的“连接到自定义 GCE VM”为 Colab 配置多 GPU VM。</p><p>我们将重点放在使用 Kaggle 提供的免费 TPU 上。</p><h2 id=开始之前>开始之前</h2><h3 id=gemma-设置>Gemma 设置</h3><p>要完成本教程，您首先需要按照 Gemma 设置<sup id=fnref:8><a href=#fn:8 class=footnote-ref role=doc-noteref>8</a></sup>的说明完成设置。Gemma 设置说明将向您展示如何进行以下操作：</p><p>Gemma 模型由 Kaggle 托管。要使用 Gemma，请在 Kaggle 上请求访问权限：</p><ul><li>在 kaggle.com<sup id=fnref:9><a href=#fn:9 class=footnote-ref role=doc-noteref>9</a></sup> 登录或注册。</li><li>打开 Gemma 模型卡片<sup id=fnref:10><a href=#fn:10 class=footnote-ref role=doc-noteref>10</a></sup>并选择“请求访问权限”。</li><li>完成同意表格并接受条款和条件。</li></ul><h2 id=安装>安装</h2><p>安装 Keras 和 KerasNLP。</p><pre><code class=language-bash># 安装最新的 Keras 3。更多信息查看 https://keras.io/getting_started/。
+!pip install -q tensorflow-cpu
+!pip install -q -U keras-nlp tensorflow-hub
+!pip install -q -U keras&gt;=3
+!pip install -U tensorflow-text
+</code></pre><h3 id=设置-keras-jax-后端>设置 Keras JAX 后端</h3><p>导入 JAX 并在 TPU 上运行健全性检查。 Kaggle 提供 TPUv3-8 设备，该设备具有 8 个 TPU 核心，每个核心有 16GB 内存。</p><pre><code class=language-python>import jax
+
+jax.devices()
+</code></pre><pre><code class=language-bash>[TpuDevice(id=0, process_index=0, coords=(0,0,0), core_on_chip=0),
+ TpuDevice(id=1, process_index=0, coords=(0,0,0), core_on_chip=1),
+ TpuDevice(id=2, process_index=0, coords=(1,0,0), core_on_chip=0),
+ TpuDevice(id=3, process_index=0, coords=(1,0,0), core_on_chip=1),
+ TpuDevice(id=4, process_index=0, coords=(0,1,0), core_on_chip=0),
+ TpuDevice(id=5, process_index=0, coords=(0,1,0), core_on_chip=1),
+ TpuDevice(id=6, process_index=0, coords=(1,1,0), core_on_chip=0),
+ TpuDevice(id=7, process_index=0, coords=(1,1,0), core_on_chip=1)]
+</code></pre><pre><code class=language-python>import os
+
+# Keras 3 分布式 API 目前仅针对 JAX 后端实现
+os.environ[&quot;KERAS_BACKEND&quot;] = &quot;jax&quot;
+# 预分配 90% 的 TPU 内存，以最大程度地减少内存碎片和分配开销
+os.environ[&quot;XLA_PYTHON_CLIENT_MEM_FRACTION&quot;] = &quot;0.9&quot;
+</code></pre><h2 id=加载模型>加载模型</h2><pre><code class=language-python>import keras
+import keras_nlp
+</code></pre><h3 id=在-nvidia-gpu-上进行混合精度训练的说明>在 NVIDIA GPU 上进行混合精度训练的说明</h3><p>在 NVIDIA GPU 上训练时，可以使用混合精度<code>（keras.mixed_precision.set_global_policy('mixed_bfloat16')）</code>来加速训练，对训练质量的影响最小。在大多数情况下，建议开启混合精度，因为它既节省内存又节省时间。但是，请注意，在小批量大小下，它可能会使内存使用量增加1.5倍（权重将被加载两次，一次为半精度，一次为全精度）。</p><p>对于推理，半精度<code>（keras.config.set_floatx("bfloat16")）</code>将会起作用并节省内存，而混合精度则不适用。</p><pre><code class=language-python># 如果您想在 GPU 上启用混合精度训练，请取消注释下面的行
+# keras.mixed_precision.set_global_policy('mixed_bfloat16')
+</code></pre><p>要在 TPU上分布式加载模型及其权重和张量，首先需要创建一个新的<code>DeviceMesh</code>。<code>DeviceMesh</code> 代表了一组为分布式计算配置的硬件设备，这在 Keras 3 中作为统一分布式API的一部分被引入。</p><p>分布式 API 支持数据和模型并行性，允许在多个加速器和主机上高效地扩展深度学习模型。它利用底层框架（例如JAX）根据分片指令通过称为单程序多数据（SPMD）扩展的过程分布程序和张量。欲了解更多详情，请查看新的 Keras 3 分布式API指南<sup id=fnref:11><a href=#fn:11 class=footnote-ref role=doc-noteref>11</a></sup>。</p><pre><code class=language-python># 要创建一个形状为（1, 8）的DeviceMesh，以便在所有8个TPUs上分片权重。
+device_mesh = keras.distribution.DeviceMesh(
+    (1, 8),
+    [&quot;batch&quot;, &quot;model&quot;],
+    devices=keras.distribution.list_devices())
+</code></pre><p>来自分布式 API 的 <code>LayoutMap</code> 指定了如何使用字符串键对权重和张量进行分片或复制，例如下面的 <code>token_embedding/embeddings</code>，这些键被当作正则表达式来匹配张量路径。匹配到的张量将根据模型维度（8 个 TPU）进行分片；其他的则会被完全复制。</p><pre><code class=language-python>model_dim = &quot;model&quot;
+
+layout_map = keras.distribution.LayoutMap(device_mesh)
+
+# 与“token_embedding/embeddings”匹配的权重将在 8 个 TPU 上进行分片
+layout_map[&quot;token_embedding/embeddings&quot;] = (None, model_dim)
+# 用于匹配解码器中的查询、键和值矩阵的正则表达式
+# 注意力层
+layout_map[&quot;decoder_block.*attention.*(query|key|value).*kernel&quot;] = (
+    None, model_dim, None)
+
+layout_map[&quot;decoder_block.*attention_output.*kernel&quot;] = (
+    None, None, model_dim)
+layout_map[&quot;decoder_block.*ffw_gating.*kernel&quot;] = (model_dim, None)
+layout_map[&quot;decoder_block.*ffw_linear.*kernel&quot;] = (None, model_dim)
+</code></pre><p><code>ModelParallel</code> 允许您在 <code>DeviceMesh</code> 上的所有设备之间分片模型权重或激活张量。在这种情况下，一些 Gemma 7B 模型的权重根据上面定义的 <code>layout_map</code> 在 8 个 TPU 芯片之间进行了分片。现在以分布式方式加载模型。</p><pre><code class=language-python>model_parallel = keras.distribution.ModelParallel(
+    device_mesh, layout_map, batch_dim_name=&quot;batch&quot;)
+
+keras.distribution.set_distribution(model_parallel)
+gemma_lm = keras_nlp.models.GemmaCausalLM.from_preset(&quot;gemma_7b_en&quot;)
+</code></pre><p>现在验证模型是否已正确分区。 我们以decoder_block_1为例。</p><pre><code class=language-python>decoder_block_1 = gemma_lm.backbone.get_layer('decoder_block_1')
+print(type(decoder_block_1))
+for variable in decoder_block_1.weights:
+  print(f'{variable.path:&lt;58}  {str(variable.shape):&lt;16}  {str(variable.value.sharding.spec)}')
+</code></pre><pre><code class=language-bash>&lt;class 'keras_nlp.src.models.gemma.gemma_decoder_block.GemmaDecoderBlock'&gt;
+decoder_block_1/pre_attention_norm/scale                    (3072,)           PartitionSpec(None,)
+decoder_block_1/attention/query/kernel                      (16, 3072, 256)   PartitionSpec(None, 'model', None)
+decoder_block_1/attention/key/kernel                        (16, 3072, 256)   PartitionSpec(None, 'model', None)
+decoder_block_1/attention/value/kernel                      (16, 3072, 256)   PartitionSpec(None, 'model', None)
+decoder_block_1/attention/attention_output/kernel           (16, 256, 3072)   PartitionSpec(None, None, 'model')
+decoder_block_1/pre_ffw_norm/scale                          (3072,)           PartitionSpec(None,)
+decoder_block_1/ffw_gating/kernel                           (3072, 24576)     PartitionSpec('model', None)
+decoder_block_1/ffw_gating_2/kernel                         (3072, 24576)     PartitionSpec('model', None)
+decoder_block_1/ffw_linear/kernel                           (24576, 3072)     PartitionSpec(None, 'model')
+</code></pre><h2 id=微调前推理>微调前推理</h2><pre><code class=language-python>gemma_lm.generate(&quot;Best comedy movies in the 90s &quot;, max_length=64)
+</code></pre><pre><code class=language-bash>'Best comedy movies in the 90s 1. The Naked Gun 2½: The Smell of Fear (1991) 2. Wayne’s World (1992) 3. The Naked Gun 33⅓: The Final Insult (1994)'
+</code></pre><p>该模型生成了 90 年代值得观看的精彩喜剧电影列表。 现在我们微调 Gemma 模型来改变输出风格。</p><h2 id=使用-imdb数据微调>使用 IMDB数据微调</h2><pre><code class=language-python>import tensorflow_datasets as tfds
+
+imdb_train = tfds.load(
+    &quot;imdb_reviews&quot;,
+    split=&quot;train&quot;,
+    as_supervised=True,
+    batch_size=2,
+)
+# 丢弃标签
+imdb_train = imdb_train.map(lambda x, y: x)
+
+imdb_train.unbatch().take(1).get_single_element().numpy()
+</code></pre><pre><code class=language-python># 使用数据集的子集来加快训练速度。
+imdb_train = imdb_train.take(2000)
+</code></pre><p>使用低秩适应（LoRA）<sup id=fnref:12><a href=#fn:12 class=footnote-ref role=doc-noteref>12</a></sup>进行微调。LoRA 是一种微调技术，通过冻结模型的全部权重并在模型中插入较少数量的新可训练权重，大大减少了下游任务的可训练参数数量。基本上，LoRA 通过两个较小的低秩矩阵 AxB 进行重新参数化，以进行训练，这种技术使训练更加快速和内存高效。</p><pre><code class=language-python># 为模型启用 LoRA 并将 LoRA 秩设置为 4。
+gemma_lm.backbone.enable_lora(rank=4)
+</code></pre><pre><code class=language-python># 对 IMDb 电影评论数据集进行微调。
+
+# 将输入序列长度限制为 128 以控制内存使用。
+gemma_lm.preprocessor.sequence_length = 128
+# 使用 AdamW（transformer 模型的常见优化器）。
+optimizer = keras.optimizers.AdamW(
+    learning_rate=5e-5,
+    weight_decay=0.01,
+)
+# 从衰减（decay）中排除 layernorm 和偏置项。
+optimizer.exclude_from_weight_decay(var_names=[&quot;bias&quot;, &quot;scale&quot;])
+
+gemma_lm.compile(
+    loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    optimizer=optimizer,
+    weighted_metrics=[keras.metrics.SparseCategoricalAccuracy()],
+)
+gemma_lm.summary()
+gemma_lm.fit(imdb_train, epochs=1)
+</code></pre><p>请注意，启用 LoRA 会显着减少可训练参数的数量，从 70 亿个减少到仅 1100 万个。</p><h2 id=微调后推理>微调后推理</h2><pre><code class=language-python>gemma_lm.generate(&quot;Best comedy movies in the 90s &quot;, max_length=64)
+</code></pre><pre><code class=language-bash>'Best comedy movies in the 90s 1990-1999. 10. Austin Powers - International Man of Mystery (1997) 9. The Wedding Singer (1998) 8. The Cable Guy (1996) 7'
+</code></pre><p>经过微调后，该模型已经了解了电影评论的风格，并且不会在 90 年代喜剧电影的背景下生成该风格的输出。</p><h2 id=来源>来源</h2><p>本文翻译自 Keras Gemma distributed finetuning and inference <a href=https://www.kaggle.com/code/nilaychauhan/keras-gemma-distributed-finetuning-and-inference>https://www.kaggle.com/code/nilaychauhan/keras-gemma-distributed-finetuning-and-inference</a></p><div class=footnotes role=doc-endnotes><hr><ol><li id=fn:1><p>在 Keras 中使用 LoRA 微调 Gemma 模型 <a href=https://ganymedenil.com/2024/03/30/Fine-tune-Gemma-model-%20in-Keras-using-LoRA.html>https://ganymedenil.com/2024/03/30/Fine-tune-Gemma-model-%20in-Keras-using-LoRA.html</a>&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:2><p>Keras指南 <a href=https://keras.io/guides/distribution/>https://keras.io/guides/distribution/</a>&#160;<a href=#fnref:2 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:3><p>Colab <a href=https://colab.sandbox.google.com/>https://colab.sandbox.google.com/</a>&#160;<a href=#fnref:3 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:4><p>Kaggle <a href=https://www.kaggle.com/>https://www.kaggle.com/</a>&#160;<a href=#fnref:4 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:5><p>Cloud TPU <a href="https://cloud.google.com/tpu?hl=en">https://cloud.google.com/tpu?hl=en</a>&#160;<a href=#fnref:5 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:6><p>TPU VM <a href=https://cloud.google.com/tpu/docs/managing-tpus-tpu-vm#tpu-vms>https://cloud.google.com/tpu/docs/managing-tpus-tpu-vm#tpu-vms</a>&#160;<a href=#fnref:6 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:7><p>SSH端口转发 <a href=https://cloud.google.com/solutions/connecting-securely#port-forwarding-over-ssh>https://cloud.google.com/solutions/connecting-securely#port-forwarding-over-ssh</a>&#160;<a href=#fnref:7 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:8><p>Gemma 设置 <a href=https://ai.google.dev/gemma/docs/setup>https://ai.google.dev/gemma/docs/setup</a>&#160;<a href=#fnref:8 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:9><p>kaggle.com <a href=https://www.kaggle.com/>https://www.kaggle.com/</a>&#160;<a href=#fnref:9 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:10><p>Gemma 模型卡片 <a href=https://www.kaggle.com/models/google/gemma>https://www.kaggle.com/models/google/gemma</a>&#160;<a href=#fnref:10 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:11><p>Keras 3 分布式API指南 <a href=https://keras.io/guides/distribution/>https://keras.io/guides/distribution/</a>&#160;<a href=#fnref:11 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:12><p>低秩适应 <a href=https://arxiv.org/abs/2106.09685>https://arxiv.org/abs/2106.09685</a>&#160;<a href=#fnref:12 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li></ol></div></div><div class=article-footer><blockquote class=mt-2x><ul class="post-copyright list-unstyled"><li class="post-copyright-link hidden-xs"><strong>本文链接:</strong>
+<a href=https://www.ganymedenil.com/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html title="在使用 Keras 进行 Gemma 模型的分布式微调和推理" target=_blank rel=external>https://www.ganymedenil.com/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html</a></li><li class=post-copyright-license><strong>版权声明：</strong><a href=http://creativecommons.org/licenses/by/4.0/deed.zh target=_blank rel=external>本博客所有文章除特别声明外，均采用 CC BY 4.0 CN协议 许可协议。转载请注明出处</a></li></ul></blockquote><div class="panel panel-default panel-badger"><div class=panel-body><figure class=media><div class=media-left><a href=https://github.com/GanymedeNil target=_blank class="img-burn thumb-sm visible-lg"><img src=/avatar.png class="img-rounded w-full" alt></a></div><div class=media-body><h3 class=media-heading><a href=https://github.com/GanymedeNil target=_blank><span class=text-dark>Ganymede Nil</span><small class=ml-1x>Developer</small></a></h3><div>喜欢新事物，关注后端动态，对新的技术有追求； 喜欢 coding。</div></div></figure></div></div></div></article><section id=comments><div id=vcomments></div></section></div><nav class="bar bar-footer clearfix" data-stick-bottom><div class=bar-inner><ul class="pager pull-left"><li class=prev><a href=/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html title="在 Keras 中使用 LoRA 微调 Gemma 模型"><i class="icon icon-angle-left" aria-hidden=true></i><span>&nbsp;&nbsp;下一篇</span></a></li><li class=next><a href=/2024/04/20/Gemma-JAX-inference.html title="Gemma JAX 推理"><span>上一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden=true></i></a></li><li class=toggle-toc><a class="toggle-btn collapsed" data-toggle=collapse href=#collapseToc aria-expanded=false title=文章目录 role=button><span>[&nbsp;</span><span>文章目录</span>
+<i class="text-collapsed icon icon-anchor"></i>
+<i class="text-in icon icon-close"></i>
+<span>]</span></a></li></ul><button type=button class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle=modal data-target=#donateModal><span>赏</span></button><div class=bar-right><div class=share-component data-sites=weibo,qq,wechat,facebook,twitter data-mobile-sites=weibo,qq,qzone></div></div></div></nav><div class="modal modal-center modal-small modal-xs-full fade" id=donateModal tabindex=-1 role=dialog><div class=modal-dialog role=document><div class="modal-content donate"><button type=button class=close data-dismiss=modal aria-label=Close><span aria-hidden=true>&#215;</span></button><div class=modal-body><div class=donate-box><div class=donate-head><p>感谢您的支持,我会继续努力的!</p></div><div class=tab-content><div role=tabpanel class="tab-pane fade active in" id=alipay><div class=donate-payimg><img src=/donate/alipay.jpg alt=扫码支持 title=扫一扫></div><p class="text-muted mv">扫码打赏, 多少你说了算~</p><p class=text-grey>打开支付宝扫一扫，即可进行扫码打赏哦~</p></div><div role=tabpanel class="tab-pane fade" id=wechatpay><div class=donate-payimg><img src=/donate/weipay.jpg alt=扫码支持 title=扫一扫></div><p class="text-muted mv">扫码打赏, 多少你说了算~</p><p class=text-grey>打开微信扫一扫，即可进行扫码打赏哦</p></div></div><div class=donate-footer><ul class="nav nav-tabs nav-justified" role=tablist><li role=presentation class=active><a href=#alipay id=alipay-tab role=tab data-toggle=tab aria-controls=alipay aria-expanded=true><i class="icon icon-alipay"></i> 支付宝</a></li><li role=presentation><a href=#wechatpay role=tab id=wechatpay-tab data-toggle=tab aria-controls=wechatpay aria-expanded=false><i class="icon icon-wepay"></i>
+微信支付</a></li></ul></div></div></div></div></div></div></main><footer class=footer itemscope itemtype=http://schema.org/WPFooter><ul class=social-links><li><a href=https://github.com/GanymedeNil target=_blank title=github data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li><li><a href=/index.xml target=_blank title=rss data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li><li><a href=http://weibo.com/jinhongyang target=_blank title=weibo data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li></ul><div class=copyright>&copy;2017 -
+2025<div class=publishby>Theme by <a href=https://github.com/cofess target=_blank>cofess </a>base on<a href=https://github.com/cofess/hexo-theme-pure target=_blank> pure</a>.</div><div>powered by <a href=https://gohugo.io/ target=_blank>hugo</a></div></div></footer><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_SVG"></script>
+<script type=text/x-mathjax-config>
+    MathJax.Hub.Config({
+            showMathMenu: false, //disables context menu
+            tex2jax: {
+            inlineMath: [ ['$','$'], ['\\(','\\)'] ]
+           }
+    });
+</script><script src=https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js></script>
+<script>window.jQuery||document.write('<script src="js/jquery.min.js"><\/script>')</script><script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/php.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/bash.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/cmake.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/dockerfile.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/json.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/lua.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/makefile.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/nginx.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/rust.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/shell.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/yaml.min.js defer></script><script>hljs.configure({tabReplace:"    ",classPrefix:""}),hljs.initHighlightingOnLoad()</script>
+<script src=/js/application.min.7ef841188add421ff966768c2e5f1a1551076353a65f0d39fbaf504b456936f8.js></script>
+<script src=/js/plugin.min.738a460bf4317fac61717f1bca393e53d00973db9754d9f0a81c7312d5874840.js></script>
+<script>(function(e){var t={TRANSLATION:{POSTS:"文章",PAGES:"页面",CATEGORIES:"分类",TAGS:"标签",UNTITLED:"(未命名)"},ROOT_URL:"https://www.ganymedenil.com",CONTENT_URL:"https://www.ganymedenil.com/searchindex.json "};e.INSIGHT_CONFIG=t})(window)</script><script type=text/javascript src=/js/insight.min.716b0c6a00b68ccc31a2b65345f3412f4246ffa94a90f8e25d525528b4504f9937880692bbe619023233caba5d0a17ebe23d7cfb57cd3a88f23ea337ad5e4d00.js defer></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js></script>
+<script>tocbot.init({tocSelector:".js-toc",contentSelector:".js-toc-content",headingSelector:"h1, h2, h3",hasInnerContainers:!0})</script><script src=https://cdn1.lncld.net/static/js/3.0.4/av-min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/valine></script>
+<script type=text/javascript>var GUEST=["nick","mail","link"],meta="nick,mail",meta=meta.split(",").filter(function(e){return GUEST.indexOf(e)>-1});new Valine({el:"#vcomments",verify:null,notify:null,appId:"lI57bh1xqblhjL3OUrOcnX2R-gzGzoHsz",appKey:"2aCHvIxz6nKXqP0sBq42gBhC",placeholder:"enjoy~",avatar:"mm",meta,pageSize:"10"||10,visitor:!1})</script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-140810980-1"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","UA-140810980-1")</script></body></html>

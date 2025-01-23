@@ -1,0 +1,203 @@
+<!doctype html><html lang=zh><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><title>在 Keras 中使用 LoRA 微调 Gemma 模型 - ZA TAN</title><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge,chrome=1"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui"><meta name=renderer content="webkit"><meta http-equiv=cache-control content="no-transform"><meta http-equiv=cache-control content="no-siteapp"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="black"><meta name=format-detection content="telephone=no,email=no,adress=no"><meta name=theme-color content="#000000"><meta http-equiv=window-target content="_top"><meta name=description content="大型语言模型（LLM）如 Gemma 已被证明在多种自然语言处理（NLP）任务上有效。LLM首先通过自监督方式在大量文本语料上进行预训练。预训练帮助 LLM 学习通用知识，例如单词之间的统计关系。然后，可以使用特定领域的数据对 LLM 进行微调，以执行下游任务（如情感分析）。
+LLM 的大小极大（参数数量达到数百万）。对于大多数应用来说，不需要进行完全微调（更新模型中的所有参数），因为典型的微调数据集相对于预训练数据集要小得多。
+低秩适应（LoRA）1是一种微调技术，通过冻结模型的权重并在模型中插入较少数量的新权重，大大减少了下游任务的可训练参数数量。这使得使用 LoRA 进行训练更快、更节省内存，并且生成的模型权重更小（几百MB），同时保持了模型输出的质量。
+本教程将引导您使用 KerasNLP 对 Gemma 2B 模型进行 LoRA 微调，使用的是 Databricks Dolly 15k数据集2。该数据集包含15,000个高质量的人类生成的提示/响应对，专门用于微调 LLM。
+"><meta name=generator content="Hugo 0.110.0 with theme pure"><title>在 Keras 中使用 LoRA 微调 Gemma 模型 - ZA TAN</title><link rel=icon href=/favicon.png type=image/x-icon><link rel=stylesheet href=/css/style.min.c58e22f1aa6179cd5cb60b9e08421a2b9a9c9fe9352d095e051b51aae209e5c0.css><link rel=stylesheet href=https://cdn.staticfile.org/highlight.js/9.15.10/styles/github.min.css async><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css async><meta property="og:title" content="在 Keras 中使用 LoRA 微调 Gemma 模型"><meta property="og:description" content="大型语言模型（LLM）如 Gemma 已被证明在多种自然语言处理（NLP）任务上有效。LLM首先通过自监督方式在大量文本语料上进行预训练。预训练帮助 LLM 学习通用知识，例如单词之间的统计关系。然后，可以使用特定领域的数据对 LLM 进行微调，以执行下游任务（如情感分析）。
+LLM 的大小极大（参数数量达到数百万）。对于大多数应用来说，不需要进行完全微调（更新模型中的所有参数），因为典型的微调数据集相对于预训练数据集要小得多。
+低秩适应（LoRA）1是一种微调技术，通过冻结模型的权重并在模型中插入较少数量的新权重，大大减少了下游任务的可训练参数数量。这使得使用 LoRA 进行训练更快、更节省内存，并且生成的模型权重更小（几百MB），同时保持了模型输出的质量。
+本教程将引导您使用 KerasNLP 对 Gemma 2B 模型进行 LoRA 微调，使用的是 Databricks Dolly 15k数据集2。该数据集包含15,000个高质量的人类生成的提示/响应对，专门用于微调 LLM。"><meta property="og:type" content="article"><meta property="og:url" content="https://www.ganymedenil.com/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html"><meta property="article:section" content="posts"><meta property="article:published_time" content="2024-03-30T21:42:12+00:00"><meta property="article:modified_time" content="2024-03-30T21:42:12+00:00"><meta itemprop=name content="在 Keras 中使用 LoRA 微调 Gemma 模型"><meta itemprop=description content="大型语言模型（LLM）如 Gemma 已被证明在多种自然语言处理（NLP）任务上有效。LLM首先通过自监督方式在大量文本语料上进行预训练。预训练帮助 LLM 学习通用知识，例如单词之间的统计关系。然后，可以使用特定领域的数据对 LLM 进行微调，以执行下游任务（如情感分析）。
+LLM 的大小极大（参数数量达到数百万）。对于大多数应用来说，不需要进行完全微调（更新模型中的所有参数），因为典型的微调数据集相对于预训练数据集要小得多。
+低秩适应（LoRA）1是一种微调技术，通过冻结模型的权重并在模型中插入较少数量的新权重，大大减少了下游任务的可训练参数数量。这使得使用 LoRA 进行训练更快、更节省内存，并且生成的模型权重更小（几百MB），同时保持了模型输出的质量。
+本教程将引导您使用 KerasNLP 对 Gemma 2B 模型进行 LoRA 微调，使用的是 Databricks Dolly 15k数据集2。该数据集包含15,000个高质量的人类生成的提示/响应对，专门用于微调 LLM。"><meta itemprop=datePublished content="2024-03-30T21:42:12+00:00"><meta itemprop=dateModified content="2024-03-30T21:42:12+00:00"><meta itemprop=wordCount content="2813"><meta itemprop=keywords content="gemma,kerasNLP,"><meta name=twitter:card content="summary"><meta name=twitter:title content="在 Keras 中使用 LoRA 微调 Gemma 模型"><meta name=twitter:description content="大型语言模型（LLM）如 Gemma 已被证明在多种自然语言处理（NLP）任务上有效。LLM首先通过自监督方式在大量文本语料上进行预训练。预训练帮助 LLM 学习通用知识，例如单词之间的统计关系。然后，可以使用特定领域的数据对 LLM 进行微调，以执行下游任务（如情感分析）。
+LLM 的大小极大（参数数量达到数百万）。对于大多数应用来说，不需要进行完全微调（更新模型中的所有参数），因为典型的微调数据集相对于预训练数据集要小得多。
+低秩适应（LoRA）1是一种微调技术，通过冻结模型的权重并在模型中插入较少数量的新权重，大大减少了下游任务的可训练参数数量。这使得使用 LoRA 进行训练更快、更节省内存，并且生成的模型权重更小（几百MB），同时保持了模型输出的质量。
+本教程将引导您使用 KerasNLP 对 Gemma 2B 模型进行 LoRA 微调，使用的是 Databricks Dolly 15k数据集2。该数据集包含15,000个高质量的人类生成的提示/响应对，专门用于微调 LLM。"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head></head><body class="main-center theme-white" itemscope itemtype=http://schema.org/WebPage><header class=header itemscope itemtype=http://schema.org/WPHeader><div class=slimContent><div class=navbar-header><div class="profile-block text-center"><a id=avatar href=https://github.com/GanymedeNil target=_blank><img class="img-circle img-rotate" src=/avatar.png width=200 height=200></a><h2 id=name class="hidden-xs hidden-sm">Ganymede Nil</h2><h3 id=title class="hidden-xs hidden-sm hidden-md">Developer</h3><small id=location class="text-muted hidden-xs hidden-sm"><i class="icon icon-map-marker"></i>BeiJing, China</small></div><div class=search id=search-form-wrap><form class="search-form sidebar-form"><div class=input-group><input type=text class="search-form-input form-control" placeholder=搜索>
+<span class=input-group-btn><button type=submit class="search-form-submit btn btn-flat" onclick=return!1><i class="icon icon-search"></i></button></span></div><div class=ins-search><div class=ins-search-mask></div><div class=ins-search-container><div class=ins-input-wrapper><input type=text class=ins-search-input placeholder=想要查找什么... x-webkit-speech>
+<button type=button class="close ins-close ins-selectable" data-dismiss=modal aria-label=Close><span aria-hidden=true>×</span></button></div><div class=ins-section-wrapper><div class=ins-section-container></div></div></div></div></form></div><button class="navbar-toggle collapsed" type=button data-toggle=collapse data-target=#main-navbar aria-controls=main-navbar aria-expanded=false>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span></button></div><nav id=main-navbar class="collapse navbar-collapse" itemscope itemtype=http://schema.org/SiteNavigationElement role=navigation><ul class="nav navbar-nav main-nav"><li class="menu-item menu-item-home"><a href=/><i class="icon icon-home-fill"></i>
+<span class=menu-title>首页</span></a></li><li class="menu-item menu-item-archives"><a href=/posts><i class="icon icon-archives-fill"></i>
+<span class=menu-title>归档</span></a></li><li class="menu-item menu-item-categories"><a href=/categories><i class="icon icon-folder"></i>
+<span class=menu-title>分类</span></a></li><li class="menu-item menu-item-tags"><a href=/tags><i class="icon icon-tags"></i>
+<span class=menu-title>标签</span></a></li><li class="menu-item menu-item-links"><a href=/links><i class="icon icon-friendship"></i>
+<span class=menu-title>友链</span></a></li><li class="menu-item menu-item-about"><a href=/about><i class="icon icon-cup-fill"></i>
+<span class=menu-title>关于</span></a></li></ul></nav></div></header><aside class=sidebar itemscope itemtype=http://schema.org/WPSideBar><div class=slimContent><div class=widget><h3 class=widget-title>公告</h3><div class=widget-body><div id=board><div class=content><p>欢迎交流与分享经验!~</p></div></div></div></div><div class=widget><h3 class=widget-title>分类</h3><div class=widget-body><ul class=category-list><li class=category-list-item><a href=/categories/AI/ class=category-list-link>AI</a><span class=category-list-count>6</span></li><li class=category-list-item><a href=/categories/Go/ class=category-list-link>Go</a><span class=category-list-count>2</span></li><li class=category-list-item><a href=/categories/Laravel/ class=category-list-link>Laravel</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/PHP/ class=category-list-link>PHP</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/go%E5%9F%BA%E7%A1%80%E5%BA%93/ class=category-list-link>go基础库</a><span class=category-list-count>52</span></li><li class=category-list-item><a href=/categories/php7/ class=category-list-link>php7</a><span class=category-list-count>5</span></li><li class=category-list-item><a href=/categories/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9C%8B%E7%9A%84NGINX/ class=category-list-link>写给大忙人看的NGINX</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%86%99%E7%BB%99%E5%A4%A7%E5%BF%99%E4%BA%BA%E7%9C%8B%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B9%A6%E7%B3%BB%E7%B1%BB/ class=category-list-link>写给大忙人看的技术书系类</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%89%8D%E7%AB%AF/ class=category-list-link>前端</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/ class=category-list-link>区块链</a><span class=category-list-count>3</span></li><li class=category-list-item><a href=/categories/%E5%BC%80%E5%8F%91/ class=category-list-link>开发</a><span class=category-list-count>17</span></li><li class=category-list-item><a href=/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/ class=category-list-link>微服务</a><span class=category-list-count>1</span></li><li class=category-list-item><a href=/categories/%E6%9E%B6%E6%9E%84/ class=category-list-link>架构</a><span class=category-list-count>1</span></li></ul></div></div><div class=widget><h3 class=widget-title>标签</h3><div class=widget-body><ul class=tag-list><li class=tag-list-item><a href=/tags/Hardhat/ class=tag-list-link>Hardhat</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/JAX/ class=tag-list-link>JAX</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/LLM/ class=tag-list-link>LLM</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/NFT/ class=tag-list-link>NFT</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Php-Storm/ class=tag-list-link>Php-Storm</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Predis/ class=tag-list-link>Predis</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/SOL/ class=tag-list-link>SOL</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Solana/ class=tag-list-link>Solana</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/Solidity/ class=tag-list-link>Solidity</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/ddd/ class=tag-list-link>ddd</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/docker/ class=tag-list-link>docker</a><span class=tag-list-count>4</span></li><li class=tag-list-item><a href=/tags/gemma/ class=tag-list-link>gemma</a><span class=tag-list-count>5</span></li><li class=tag-list-item><a href=/tags/go/ class=tag-list-link>go</a><span class=tag-list-count>57</span></li><li class=tag-list-item><a href=/tags/hexo/ class=tag-list-link>hexo</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/kerasNLP/ class=tag-list-link>kerasNLP</a><span class=tag-list-count>3</span></li><li class=tag-list-item><a href=/tags/laravel/ class=tag-list-link>laravel</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/linux/ class=tag-list-link>linux</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/nginx/ class=tag-list-link>nginx</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/nuxt/ class=tag-list-link>nuxt</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/php/ class=tag-list-link>php</a><span class=tag-list-count>5</span></li><li class=tag-list-item><a href=/tags/redis/ class=tag-list-link>redis</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/rust/ class=tag-list-link>rust</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/swoole/ class=tag-list-link>swoole</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/web3/ class=tag-list-link>web3</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/xdebug/ class=tag-list-link>xdebug</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E4%BB%A5%E5%A4%AA%E5%9D%8A/ class=tag-list-link>以太坊</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E6%80%BB%E7%BB%93/ class=tag-list-link>总结</a><span class=tag-list-count>1</span></li><li class=tag-list-item><a href=/tags/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6/ class=tag-list-link>智能合约</a><span class=tag-list-count>1</span></li></ul></div></div><div class=widget><h3 class=widget-title>最新文章</h3><div class=widget-body><ul class="recent-post-list list-unstyled no-thumbnail"><li><div class=item-inner><p class=item-title><a href=/2025/01/23/solana-tutorial-1.html class=title>Solana 链开发实战（一）</a></p><p class=item-date><time datetime="2025-01-23 18:08:23 +0000 UTC" itemprop=datePublished>2025-01-23</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/04/20/Gemma-JAX-inference.html class=title>Gemma JAX 推理</a></p><p class=item-date><time datetime="2024-04-20 23:10:39 +0000 UTC" itemprop=datePublished>2024-04-20</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html class=title>在使用 Keras 进行 Gemma 模型的分布式微调和推理</a></p><p class=item-date><time datetime="2024-03-30 22:32:29 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html class=title>在 Keras 中使用 LoRA 微调 Gemma 模型</a></p><p class=item-date><time datetime="2024-03-30 21:42:12 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li><li><div class=item-inner><p class=item-title><a href=/2024/03/30/Get-started-with-Gemma-using-KerasNLP.html class=title>使用 KerasNLP 快速开始 Gemma</a></p><p class=item-date><time datetime="2024-03-30 19:20:02 +0000 UTC" itemprop=datePublished>2024-03-30</time></p></div></li></ul></div></div></div></aside><aside class="sidebar sidebar-toc collapse" id=collapseToc itemscope itemtype=http://schema.org/WPSideBar><div class=slimContent><h4 class=toc-title>文章目录</h4><nav id=toc class="js-toc toc"></nav></div></aside><main class=main role=main><div class=content><article id=- class="article article-type-" itemscope itemtype=http://schema.org/BlogPosting><div class=article-header><h1 itemprop=name><a class=article-title href=/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html>在 Keras 中使用 LoRA 微调 Gemma 模型</a></h1><div class=article-meta><span class=article-date><i class="icon icon-calendar-check"></i>&nbsp;
+<a href=/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html class=article-date><time datetime="2024-03-30 21:42:12 +0000 UTC" itemprop=datePublished>2024-03-30</time></a></span>
+<span class=article-category><i class="icon icon-folder"></i>&nbsp;
+<a class=article-category-link href=/categories/%E5%BC%80%E5%8F%91/>开发</a>
+<a class=article-category-link href=/categories/AI/>AI</a></span>
+<span class=article-tag><i class="icon icon-tags"></i>&nbsp;
+<a class=article-tag-link href=/tags/gemma/>gemma</a>
+<a class=article-tag-link href=/tags/kerasNLP/>kerasNLP</a></span>
+<span class=post-comment><i class="icon icon-comment"></i>&nbsp;<a href=/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html#comments class=article-comment-link>评论</a></span>
+<span class="post-wordcount hidden-xs" itemprop=wordCount>字数统计: 2813字</span>
+<span class="post-readcount hidden-xs" itemprop=timeRequired>阅读时长: 6分</span></div></div><div class="article-entry marked-body js-toc-content" itemprop=articleBody><p>大型语言模型（LLM）如 Gemma 已被证明在多种自然语言处理（NLP）任务上有效。LLM首先通过自监督方式在大量文本语料上进行预训练。预训练帮助 LLM 学习通用知识，例如单词之间的统计关系。然后，可以使用特定领域的数据对 LLM 进行微调，以执行下游任务（如情感分析）。</p><p>LLM 的大小极大（参数数量达到数百万）。对于大多数应用来说，不需要进行完全微调（更新模型中的所有参数），因为典型的微调数据集相对于预训练数据集要小得多。</p><p>低秩适应（LoRA）<sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup>是一种微调技术，通过冻结模型的权重并在模型中插入较少数量的新权重，大大减少了下游任务的可训练参数数量。这使得使用 LoRA 进行训练更快、更节省内存，并且生成的模型权重更小（几百MB），同时保持了模型输出的质量。</p><p>本教程将引导您使用 KerasNLP 对 Gemma 2B 模型进行 LoRA 微调，使用的是 Databricks Dolly 15k数据集<sup id=fnref:2><a href=#fn:2 class=footnote-ref role=doc-noteref>2</a></sup>。该数据集包含15,000个高质量的人类生成的提示/响应对，专门用于微调 LLM。</p><h2 id=设置>设置</h2><h3 id=gemma-设置>Gemma 设置</h3><p>要完成本教程，您首先需要按照 Gemma 设置<sup id=fnref:3><a href=#fn:3 class=footnote-ref role=doc-noteref>3</a></sup>的说明完成设置。Gemma 设置说明将向您展示如何进行以下操作：</p><p>Gemma 模型由 Kaggle 托管。要使用 Gemma，请在 Kaggle 上请求访问权限：</p><ul><li>在 kaggle.com<sup id=fnref:4><a href=#fn:4 class=footnote-ref role=doc-noteref>4</a></sup> 登录或注册。</li><li>打开 Gemma 模型卡片<sup id=fnref:5><a href=#fn:5 class=footnote-ref role=doc-noteref>5</a></sup>并选择“请求访问权限”。</li><li>完成同意表格并接受条款和条件。</li></ul><h3 id=安装依赖>安装依赖</h3><p>安装 Keras 、 KerasNLP 和其他依赖。</p><pre><code class=language-bash># 安装最新的 Keras 3。更多信息查看 https://keras.io/getting_started/。
+
+!pip install -q -U keras-nlp
+!pip install -q -U keras&gt;=3
+</code></pre><h3 id=选择一个后端>选择一个后端</h3><p>Keras 是一个高级的、多框架的深度学习API，设计上注重简单性和易用性。Keras 3 允许您选择后端：TensorFlow、JAX或 PyTorch。这三个后端对于本教程都适用。</p><p>在本教程中，我们使用 JAX 作为后端。</p><pre><code class=language-python>import os
+
+os.environ[&quot;KERAS_BACKEND&quot;] = &quot;jax&quot;  # 或者 &quot;tensorflow&quot; 、 &quot;torch&quot;。
+# 在使用JAX后端时，避免内存碎片化。
+os.environ[&quot;XLA_PYTHON_CLIENT_MEM_FRACTION&quot;]=&quot;1.00&quot;
+</code></pre><h3 id=导入包>导入包</h3><p>导入 Keras 和 KerasNLP。</p><pre><code class=language-python>import keras
+import keras_nlp
+</code></pre><h2 id=加载数据集>加载数据集</h2><p>预处理数据是微调模型的重要步骤，尤其是当使用大型语言模型时。本教程使用的是1000个训练示例的子集，以便更快地执行。如果想要获得更高质量的微调效果，建议使用更多的训练数据。</p><pre><code class=language-python>import json
+data = []
+with open('/kaggle/input/databricks-dolly-15k/databricks-dolly-15k.jsonl') as file:
+    for line in file:
+        features = json.loads(line)
+        # 过滤掉带有上下文的示例，以保持简单。
+        if features[&quot;context&quot;]:
+            continue
+        # 将整个示例格式化为单个字符串。
+        template = &quot;Instruction:\n{instruction}\n\nResponse:\n{response}&quot;
+        data.append(template.format(**features))
+
+# 仅使用 1000 个训练示例，以保持快速。
+data = data[:1000]
+
+</code></pre><h2 id=加载模型>加载模型</h2><p>KerasNLP 提供了许多流行模型架构<sup id=fnref:6><a href=#fn:6 class=footnote-ref role=doc-noteref>6</a></sup>的实现。在本教程中，您将使用 <code>GemmaCausalLM</code> 创建一个模型，这是一个用于因果语言建模的端到端 Gemma 模型。因果语言模型基于前面的令牌预测下一个令牌。</p><p>使用 <code>from_preset</code> 方法创建模型：</p><pre><code class=language-python>gemma_lm = keras_nlp.models.GemmaCausalLM.from_preset(&quot;gemma_2b_en&quot;)
+gemma_lm.summary()
+</code></pre><pre><code class=language-bash>Preprocessor: &quot;gemma_causal_lm_preprocessor&quot;
+</code></pre><table><thead><tr><th>Tokenizer (type)</th><th>Vocab #</th></tr></thead><tbody><tr><td>gemma_tokenizer (GemmaTokenizer)</td><td>256,000</td></tr></tbody></table><pre><code class=language-bash>Model: &quot;gemma_causal_lm&quot;
+</code></pre><table><thead><tr><th>Layer (type)</th><th>Output Shape</th><th>Param #</th><th>Connected to</th></tr></thead><tbody><tr><td>padding_mask (InputLayer)</td><td>(None, None)</td><td>0</td><td>-</td></tr><tr><td>token_ids (InputLayer)</td><td>(None, None)</td><td>0</td><td>-</td></tr><tr><td>gemma_backbone (GemmaBackbone)</td><td>(None, None, 2048)</td><td>2,506,172,416</td><td>padding_mask[0][0], token_ids[0][0]</td></tr><tr><td>token_embedding (ReversibleEmbedding)</td><td>(None, None, 256000)</td><td>524,288,000</td><td>gemma_backbone[0][0]</td></tr></tbody></table><pre><code class=language-bash> Total params: 2,506,172,416 (9.34 GB)
+</code></pre><pre><code class=language-bash> Trainable params: 2,506,172,416 (9.34 GB)
+</code></pre><pre><code class=language-bash> Non-trainable params: 0 (0.00 B)
+</code></pre><p><code>from_preset</code> 方法从预设的架构和权重中实例化模型。在上述代码中，字符串 &ldquo;gemma_2b_en&rdquo; 指定了预设的架构 —— 一个拥有 20 亿参数的 Gemma 模型。</p><p>注意：Gemma 也提供了一个有 70 亿参数的模型。要在 Colab 中运行更大的模型，您需要访问付费计划中提供的高级 GPU。或者，您可以在 Kaggle 或 Google Cloud 上对 Gemma 7B 模型进行分布式调优<sup id=fnref:7><a href=#fn:7 class=footnote-ref role=doc-noteref>7</a></sup>。</p><h2 id=在微调之前的推理>在微调之前的推理</h2><p>在本节中，您将用各种提示查询模型，以查看其如何响应。</p><h3 id=欧洲旅行提示>欧洲旅行提示</h3><p>查询模型以获取关于欧洲旅行应做些什么的建议。</p><pre><code class=language-python>prompt = template.format(
+    instruction=&quot;What should I do on a trip to Europe?&quot;,
+    response=&quot;&quot;,
+)
+print(gemma_lm.generate(prompt, max_length=256))
+</code></pre><pre><code class=language-bash>Instruction:
+What should I do on a trip to Europe?
+
+Response:
+1. Take a trip to Europe.
+2. Take a trip to Europe.
+3. Take a trip to Europe.
+4. Take a trip to Europe.
+5. Take a trip to Europe.
+6. Take a trip to Europe.
+7. Take a trip to Europe.
+8. Take a trip to Europe.
+9. Take a trip to Europe.
+10. Take a trip to Europe.
+11. Take a trip to Europe.
+12. Take a trip to Europe.
+13. Take a trip to Europe.
+14. Take a trip to Europe.
+15. Take a trip to Europe.
+16. Take a trip to Europe.
+17. Take a trip to Europe.
+18. Take a trip to Europe.
+19. Take a trip to Europe.
+20. Take a trip to Europe.
+21. Take a trip to Europe.
+22. Take a trip to Europe.
+23. Take a trip to Europe.
+24. Take a trip to Europe.
+25. Take a trip to
+</code></pre><p>该模型只是重复打印“Take a trip to Europe”。</p><h3 id=eli5-光合作用提示>ELI5 光合作用提示</h3><p>提示模型用 5 岁儿童能够理解的简单术语解释光合作用。</p><pre><code class=language-python>prompt = template.format(
+    instruction=&quot;Explain the process of photosynthesis in a way that a child could understand.&quot;,
+    response=&quot;&quot;,
+)
+print(gemma_lm.generate(prompt, max_length=256))
+</code></pre><pre><code class=language-bash>Instruction:
+Explain the process of photosynthesis in a way that a child could understand.
+
+Response:
+Photosynthesis is the process by which plants use the energy from the sun to convert water and carbon dioxide into oxygen and glucose. The process begins with the absorption of light energy by chlorophyll molecules in the leaves of plants. The energy from the light is used to split water molecules into hydrogen and oxygen. The oxygen is released into the atmosphere, while the hydrogen is used to make glucose. The glucose is then used by the plant to make energy and grow.
+
+Explanation:
+Photosynthesis is the process by which plants use the energy from the sun to convert water and carbon dioxide into oxygen and glucose. The process begins with the absorption of light energy by chlorophyll molecules in the leaves of plants. The energy from the light is used to split water molecules into hydrogen and oxygen. The oxygen is released into the atmosphere, while the hydrogen is used to make glucose. The glucose is then used by the plant to make energy and grow.
+
+Explanation:
+
+Photosynthesis is the process by which plants use the energy from the sun to convert water and carbon dioxide into oxygen and glucose. The process begins with the absorption of light energy by chlorophyll molecules in the leaves of plants. The energy from
+</code></pre><p>回答中包含对儿童来说可能不容易理解的单词，例如叶绿素、葡萄糖等。</p><h2 id=lora-微调>LoRA 微调</h2><p>要从模型中获得更好的响应，可以使用 Databricks Dolly 15k 数据集通过低秩适应（LoRA）对模型进行微调。</p><p>LoRA 秩决定了添加到 LLM 原始权重中的可训练矩阵的维度。它控制着微调调整的表达性和精度。</p><p>更高的秩意味着可以进行更详细的更改，但也意味着有更多的可训练参数。较低的秩意味着计算开销较小，但可能导致适应性不够精确。</p><p>本教程使用的 LoRA 秩为 4。在实践中，从相对较小的秩开始（例如 4、8、16）是计算上高效的试验方法。使用这个秩训练您的模型，并评估在您的任务上的性能改进。逐渐增加后续试验的秩，看看是否能进一步提高性能。</p><pre><code class=language-python># 为模型启用 LoRA 并将 LoRA 秩设置为 4。
+gemma_lm.backbone.enable_lora(rank=4)
+gemma_lm.summary()
+</code></pre><pre><code class=language-bash>Preprocessor: &quot;gemma_causal_lm_preprocessor&quot;
+</code></pre><table><thead><tr><th>Tokenizer (type)</th><th>Vocab #</th></tr></thead><tbody><tr><td>gemma_tokenizer (GemmaTokenizer)</td><td>256,000</td></tr></tbody></table><pre><code class=language-bash>Model: &quot;gemma_causal_lm&quot;
+</code></pre><table><thead><tr><th>Layer (type)</th><th>Output Shape</th><th>Param #</th><th>Connected to</th></tr></thead><tbody><tr><td>padding_mask (InputLayer)</td><td>(None, None)</td><td>0</td><td>-</td></tr><tr><td>token_ids (InputLayer)</td><td>(None, None)</td><td>0</td><td>-</td></tr><tr><td>gemma_backbone (GemmaBackbone)</td><td>(None, None, 2048)</td><td>2,507,536,384</td><td>padding_mask[0][0], token_ids[0][0]</td></tr><tr><td>token_embedding (ReversibleEmbedding)</td><td>(None, None, 256000)</td><td>524,288,000</td><td>gemma_backbone[0][0]</td></tr></tbody></table><pre><code class=language-bash> Total params: 2,507,536,384 (9.34 GB)
+</code></pre><pre><code class=language-bash> Trainable params: 1,363,968 (5.20 MB)
+</code></pre><pre><code class=language-bash> Non-trainable params: 2,506,172,416 (9.34 GB)
+</code></pre><p>请注意，启用 LoRA 会显着减少可训练参数的数量（从 25 亿减少到 130 万）。</p><pre><code class=language-python># 将输入序列长度限制为 512（以控制内存使用）。
+gemma_lm.preprocessor.sequence_length = 512
+# 使用 AdamW（transformer 模型的常见优化器）。
+optimizer = keras.optimizers.AdamW(
+    learning_rate=5e-5,
+    weight_decay=0.01,
+)
+# 从衰减（decay）中排除 layernorm 和偏置项。
+optimizer.exclude_from_weight_decay(var_names=[&quot;bias&quot;, &quot;scale&quot;])
+
+gemma_lm.compile(
+    loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    optimizer=optimizer,
+    weighted_metrics=[keras.metrics.SparseCategoricalAccuracy()],
+)
+gemma_lm.fit(data, epochs=1, batch_size=1)
+</code></pre><h2 id=微调之后的推理>微调之后的推理</h2><p>微调后，模型的响应会遵循提示中提供的指令。</p><h3 id=欧洲旅行提示-1>欧洲旅行提示</h3><pre><code class=language-python>prompt = template.format(
+    instruction=&quot;What should I do on a trip to Europe?&quot;,
+    response=&quot;&quot;,
+)
+print(gemma_lm.generate(prompt, max_length=256))
+</code></pre><pre><code class=language-bash>Instruction:
+What should I do on a trip to Europe?
+
+Response:
+You should plan to see the most famous sights in Europe. The Eiffel Tower, the Acropolis, and the Colosseum are just a few. You should also plan on seeing as many countries as possible. There are so many amazing places in Europe, it is a shame to not see them all.
+
+Additional Information:
+Europe is a very interesting place to visit for many reasons, not least of which is that there are so many different places to see.
+</code></pre><p>微调后的模型现在可以推荐在欧洲访问的地方了。</p><h3 id=eli5-光合作用提示-1>ELI5 光合作用提示</h3><pre><code class=language-python>prompt = template.format(
+    instruction=&quot;Explain the process of photosynthesis in a way that a child could understand.&quot;,
+    response=&quot;&quot;,
+)
+print(gemma_lm.generate(prompt, max_length=256))
+</code></pre><pre><code class=language-bash>Instruction:
+Explain the process of photosynthesis in a way that a child could understand.
+
+Response:
+Photosynthesis is a process in which plants and photosynthetic organisms (such as algae, cyanobacteria, and some bacteria and archaea) use light energy to convert water and carbon dioxide into sugar and release oxygen. This process requires chlorophyll, water, carbon dioxide, and energy. The chlorophyll captures the light energy and uses it to power a reaction that converts the carbon from carbon dioxide into organic molecules (such as sugar) that can be used for energy. The process also generates oxygen as a by-product.
+</code></pre><p>该模型现在用简单的术语解释了光合作用。</p><p>请注意，出于演示目的，本教程仅在数据集的小子集上对模型进行了一次迭代（epoch）的微调，并且使用了较低的 LoRA 秩值。要从微调后的模型中获得更好的响应，您可以尝试：</p><ol><li>增加微调数据集的大小。</li><li>增加训练步骤（迭代次数）。</li><li>设置更高的 LoRA 秩。</li><li>修改超参数值，如学习率（learning_rate）和权重衰减（weight_decay）。</li></ol><h2 id=来源>来源</h2><p>本文翻译自 Fine-tune Gemma models in Keras using LoRA <a href=https://www.kaggle.com/code/nilaychauhan/fine-tune-gemma-models-in-keras-using-lora>https://www.kaggle.com/code/nilaychauhan/fine-tune-gemma-models-in-keras-using-lora</a></p><div class=footnotes role=doc-endnotes><hr><ol><li id=fn:1><p>低秩适应（LoRA）https://arxiv.org/abs/2106.09685&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:2><p>Databricks Dolly 15k数据集 <a href=https://www.kaggle.com/datasets/databricks/databricks-dolly-15k>https://www.kaggle.com/datasets/databricks/databricks-dolly-15k</a>&#160;<a href=#fnref:2 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:3><p>Gemma 设置 <a href=https://ai.google.dev/gemma/docs/setup>https://ai.google.dev/gemma/docs/setup</a>&#160;<a href=#fnref:3 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:4><p>kaggle.com <a href=https://www.kaggle.com/>https://www.kaggle.com/</a>&#160;<a href=#fnref:4 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:5><p>Gemma 模型卡片 <a href=https://www.kaggle.com/models/google/gemma>https://www.kaggle.com/models/google/gemma</a>&#160;<a href=#fnref:5 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:6><p>模型架构 <a href=https://keras.io/api/keras_nlp/models/>https://keras.io/api/keras_nlp/models/</a>&#160;<a href=#fnref:6 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li><li id=fn:7><p>Gemma 7B 模型进行分布式调优 <a href=https://ai.google.dev/gemma/docs/distributed_tuning>https://ai.google.dev/gemma/docs/distributed_tuning</a>&#160;<a href=#fnref:7 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></p></li></ol></div></div><div class=article-footer><blockquote class=mt-2x><ul class="post-copyright list-unstyled"><li class="post-copyright-link hidden-xs"><strong>本文链接:</strong>
+<a href=https://www.ganymedenil.com/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html title="在 Keras 中使用 LoRA 微调 Gemma 模型" target=_blank rel=external>https://www.ganymedenil.com/2024/03/30/Fine-tune-Gemma-model-in-Keras-using-LoRA.html</a></li><li class=post-copyright-license><strong>版权声明：</strong><a href=http://creativecommons.org/licenses/by/4.0/deed.zh target=_blank rel=external>本博客所有文章除特别声明外，均采用 CC BY 4.0 CN协议 许可协议。转载请注明出处</a></li></ul></blockquote><div class="panel panel-default panel-badger"><div class=panel-body><figure class=media><div class=media-left><a href=https://github.com/GanymedeNil target=_blank class="img-burn thumb-sm visible-lg"><img src=/avatar.png class="img-rounded w-full" alt></a></div><div class=media-body><h3 class=media-heading><a href=https://github.com/GanymedeNil target=_blank><span class=text-dark>Ganymede Nil</span><small class=ml-1x>Developer</small></a></h3><div>喜欢新事物，关注后端动态，对新的技术有追求； 喜欢 coding。</div></div></figure></div></div></div></article><section id=comments><div id=vcomments></div></section></div><nav class="bar bar-footer clearfix" data-stick-bottom><div class=bar-inner><ul class="pager pull-left"><li class=prev><a href=/2024/03/30/Get-started-with-Gemma-using-KerasNLP.html title="使用 KerasNLP 快速开始 Gemma"><i class="icon icon-angle-left" aria-hidden=true></i><span>&nbsp;&nbsp;下一篇</span></a></li><li class=next><a href=/2024/03/30/Keras-Gemma-distributed-finetuning-and-inference.html title="在使用 Keras 进行 Gemma 模型的分布式微调和推理"><span>上一篇&nbsp;&nbsp;</span><i class="icon icon-angle-right" aria-hidden=true></i></a></li><li class=toggle-toc><a class="toggle-btn collapsed" data-toggle=collapse href=#collapseToc aria-expanded=false title=文章目录 role=button><span>[&nbsp;</span><span>文章目录</span>
+<i class="text-collapsed icon icon-anchor"></i>
+<i class="text-in icon icon-close"></i>
+<span>]</span></a></li></ul><button type=button class="btn btn-fancy btn-donate pop-onhover bg-gradient-warning" data-toggle=modal data-target=#donateModal><span>赏</span></button><div class=bar-right><div class=share-component data-sites=weibo,qq,wechat,facebook,twitter data-mobile-sites=weibo,qq,qzone></div></div></div></nav><div class="modal modal-center modal-small modal-xs-full fade" id=donateModal tabindex=-1 role=dialog><div class=modal-dialog role=document><div class="modal-content donate"><button type=button class=close data-dismiss=modal aria-label=Close><span aria-hidden=true>&#215;</span></button><div class=modal-body><div class=donate-box><div class=donate-head><p>感谢您的支持,我会继续努力的!</p></div><div class=tab-content><div role=tabpanel class="tab-pane fade active in" id=alipay><div class=donate-payimg><img src=/donate/alipay.jpg alt=扫码支持 title=扫一扫></div><p class="text-muted mv">扫码打赏, 多少你说了算~</p><p class=text-grey>打开支付宝扫一扫，即可进行扫码打赏哦~</p></div><div role=tabpanel class="tab-pane fade" id=wechatpay><div class=donate-payimg><img src=/donate/weipay.jpg alt=扫码支持 title=扫一扫></div><p class="text-muted mv">扫码打赏, 多少你说了算~</p><p class=text-grey>打开微信扫一扫，即可进行扫码打赏哦</p></div></div><div class=donate-footer><ul class="nav nav-tabs nav-justified" role=tablist><li role=presentation class=active><a href=#alipay id=alipay-tab role=tab data-toggle=tab aria-controls=alipay aria-expanded=true><i class="icon icon-alipay"></i> 支付宝</a></li><li role=presentation><a href=#wechatpay role=tab id=wechatpay-tab data-toggle=tab aria-controls=wechatpay aria-expanded=false><i class="icon icon-wepay"></i>
+微信支付</a></li></ul></div></div></div></div></div></div></main><footer class=footer itemscope itemtype=http://schema.org/WPFooter><ul class=social-links><li><a href=https://github.com/GanymedeNil target=_blank title=github data-toggle=tooltip data-placement=top><i class="icon icon-github"></i></a></li><li><a href=/index.xml target=_blank title=rss data-toggle=tooltip data-placement=top><i class="icon icon-rss"></i></a></li><li><a href=http://weibo.com/jinhongyang target=_blank title=weibo data-toggle=tooltip data-placement=top><i class="icon icon-weibo"></i></a></li></ul><div class=copyright>&copy;2017 -
+2025<div class=publishby>Theme by <a href=https://github.com/cofess target=_blank>cofess </a>base on<a href=https://github.com/cofess/hexo-theme-pure target=_blank> pure</a>.</div><div>powered by <a href=https://gohugo.io/ target=_blank>hugo</a></div></div></footer><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_SVG"></script>
+<script type=text/x-mathjax-config>
+    MathJax.Hub.Config({
+            showMathMenu: false, //disables context menu
+            tex2jax: {
+            inlineMath: [ ['$','$'], ['\\(','\\)'] ]
+           }
+    });
+</script><script src=https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js></script>
+<script>window.jQuery||document.write('<script src="js/jquery.min.js"><\/script>')</script><script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/highlight.min.js></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/go.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/php.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/bash.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/cmake.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/dockerfile.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/json.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/lua.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/makefile.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/nginx.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/rust.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/shell.min.js defer></script>
+<script type=text/javascript src=https://cdn.staticfile.org/highlight.js/9.15.10/languages/yaml.min.js defer></script><script>hljs.configure({tabReplace:"    ",classPrefix:""}),hljs.initHighlightingOnLoad()</script>
+<script src=/js/application.min.7ef841188add421ff966768c2e5f1a1551076353a65f0d39fbaf504b456936f8.js></script>
+<script src=/js/plugin.min.738a460bf4317fac61717f1bca393e53d00973db9754d9f0a81c7312d5874840.js></script>
+<script>(function(e){var t={TRANSLATION:{POSTS:"文章",PAGES:"页面",CATEGORIES:"分类",TAGS:"标签",UNTITLED:"(未命名)"},ROOT_URL:"https://www.ganymedenil.com",CONTENT_URL:"https://www.ganymedenil.com/searchindex.json "};e.INSIGHT_CONFIG=t})(window)</script><script type=text/javascript src=/js/insight.min.716b0c6a00b68ccc31a2b65345f3412f4246ffa94a90f8e25d525528b4504f9937880692bbe619023233caba5d0a17ebe23d7cfb57cd3a88f23ea337ad5e4d00.js defer></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js></script>
+<script>tocbot.init({tocSelector:".js-toc",contentSelector:".js-toc-content",headingSelector:"h1, h2, h3",hasInnerContainers:!0})</script><script src=https://cdn1.lncld.net/static/js/3.0.4/av-min.js></script>
+<script src=https://cdn.jsdelivr.net/npm/valine></script>
+<script type=text/javascript>var GUEST=["nick","mail","link"],meta="nick,mail",meta=meta.split(",").filter(function(e){return GUEST.indexOf(e)>-1});new Valine({el:"#vcomments",verify:null,notify:null,appId:"lI57bh1xqblhjL3OUrOcnX2R-gzGzoHsz",appKey:"2aCHvIxz6nKXqP0sBq42gBhC",placeholder:"enjoy~",avatar:"mm",meta,pageSize:"10"||10,visitor:!1})</script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-140810980-1"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","UA-140810980-1")</script></body></html>
